@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
             if (m->codage.mode == REGREG)
                 REG[m->codage.dest] += REG[m->codage.source];
             else if (m->codage.mode == REGIMM)
-                REG[m->codage.dest] += REG[m->codage.source];
+                REG[m->codage.dest] += m->codage.source;
         }
     }
 
