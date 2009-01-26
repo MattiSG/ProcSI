@@ -2,7 +2,7 @@
  *
  *  Questions :
  *  1) Quelles options de compilations doit-on utiliser (std=c99, Wall, Werror, ansi) ?
- *
+ * TODO
  *
  */
 
@@ -15,25 +15,25 @@
 #include "mot.h"
 #include "util.h"
 
-/*const unsigned int NB_REG = 8;*/
-#define NB_REG 8
-uint16_t PC = 0;
-uint16_t SP = 0;
-uint16_t SR = 0;
-uint16_t REG[NB_REG] = {0};
 
-void displayStatus()
-{
-    printf("==> Status <==\n");
-    unsigned int i;
-    for (i = 0; i < NB_REG; ++i)
-        printf("\tREG[%d] = %d\n", i, REG[i]);
-}
 
 int main(int argc, char *argv[])
 {
-    REG[3] = 1;
-    REG[4] = 2;
+    SIVM sivm;
+    
+    mot prgtest[] = {
+        { .codage = { ADD, REGREG, 3, 4 }},
+        { .codage = { ADD, REGREG, 4, 1 }}
+    };
+
+    sivm_new(&sivm);
+    sivm_load(&sivm, sizeof(prgtest) / sizeof(prgtest[0]), prgtest);
+    sivm.reg[3] = 1;
+    sivm.reg[4] = 2;
+    sivm_status(&sivm);
+    while (sivm_step(&sivm)) {}
+    sivm_status(&sivm);
+
     /*
     mot mem[] = {
         { .codage = { ADD,  REGREG, 3, 4 }},
@@ -42,15 +42,7 @@ int main(int argc, char *argv[])
         { .codage = { JMP,  REGIMM       }},
         { .brut   =   1500                }
     };
-    */
-
-    mot mem[] = {
-        { .codage = { ADD, REGREG, 3, 4 }},
-        { .codage = { ADD, REGREG, 4, 1 }}
-    };
-
-    displayStatus();
-
+    //displayStatus();
     unsigned int i;
     unsigned int taille = sizeof(mem)/sizeof(mot);
     for (i = 0; i < taille; ++i)
@@ -70,6 +62,6 @@ int main(int argc, char *argv[])
     }
 
     displayStatus();
-
+*/
     return 0;
 }

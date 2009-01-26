@@ -1,158 +1,101 @@
 #include "mot.h"
 
-bool checkModesLOAD(enum mode m)
+bool instr_load(SIVM *sivm, mot *m)
 {
-    switch(m)
+    switch (m->codage.mode)
     {
-        case REGDIR:
-            return true;
-        case REGIMM:
-            return true;
-        case REGIND:
-            return true;
-        default:
-            return false;
+    case REGDIR:
+        sivm->reg[m->codage.dest] = m->codage.source;
+        break;
+    case REGIMM:
+        break;
+    case REGIND:
+        break;
     }
+    sivm->pc++;
+    return true;
 }
 
-bool checkModesSTORE(enum mode m)
+bool instr_store(SIVM *sivm, mot *m)
 {
-    switch(m)
-    {
-        case DIRIMM:
-            return true;
-        case DIRREG:
-            return true;
-        case INDIMM:
-            return true;
-        case INDREG:
-            return true;
-        default:
-            return false;
-    }
+    sivm->pc++;
+    return false;
 }
 
-bool checkModesADD(enum mode m)
+bool instr_add(SIVM *sivm, mot *m)
 {
-    switch(m)
+    switch (m->codage.mode)
     {
-        case REGREG:
-            return true;
-        case REGIMM:
-            return true;
-        case REGDIR:
-            return true;
-        case REGIND:
-            return true;
-        default:
-            return false;
+    case REGREG:
+        sivm->reg[m->codage.dest] += sivm->reg[m->codage.source];
+        break;
+    case REGIMM:
+        sivm->reg[m->codage.dest] += m->codage.source;
+        break;
     }
+    sivm->pc++;
+    return true;
 }
 
-bool checkModesSUB(enum mode m)
-{
-    switch(m)
-    {
-        case REGREG:
-            return true;
-        case REGIMM:
-            return true;
-        case REGDIR:
-            return true;
-        case REGIND:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool checkModesJMP(enum mode m)
-{
-    switch(m)
-    {
-        default:
-            return false;
-    }
-}
-
-bool checkModesJEQ(enum mode m)
-{
-    switch(m)
-    {
-        default:
-            return false;
-    }
-}
-
-bool checkModesCALL(enum mode m)
-{
-    switch(m)
-    {
-        default:
-            return false;
-    }
-}
-
-bool checkModesRET(enum mode m)
-{
-    switch(m)
-    {
-        default:
-            return false;
-    }
-}
-
-bool checkModesPUSH(enum mode m)
-{
-    switch(m)
-    {
-        default:
-            return false;
-    }
-}
-
-bool checkModesPOP(enum mode m)
-{
-    switch(m)
-    {
-        default:
-            return false;
-    }
-}
-
-bool checkModesHALT(enum mode m)
-{
-    switch(m)
-    {
-        default:
-            return false;
-    }
-}
+Instr instrs[] = {
+    [LOAD] = {instr_load, FM_REGDIR | FM_REGIMM | FM_REGIND},
+    [STORE] = {instr_store, FM_DIRIMM | FM_DIRREG | FM_INDIMM | INDREG},
+    [ADD] = {instr_add, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND}
+};
 
 bool checkModes(mot *m)
 {
-    if (m->codage.codeop == LOAD)
-        return checkModesLOAD(m->codage.mode);
-    if (m->codage.codeop == STORE)
-        return checkModesSTORE(m->codage.mode);
-    if (m->codage.codeop == ADD)
-        return checkModesADD(m->codage.mode);
-    if (m->codage.codeop == SUB)
-        return checkModesSUB(m->codage.mode);
-    if (m->codage.codeop == JMP)
-        return checkModesJMP(m->codage.mode);
-    if (m->codage.codeop == JEQ)
-        return checkModesJEQ(m->codage.mode);
-    if (m->codage.codeop == CALL)
-        return checkModesCALL(m->codage.mode);
-    if (m->codage.codeop == RET)
-        return checkModesRET(m->codage.mode);
-    if (m->codage.codeop == PUSH)
-        return checkModesPUSH(m->codage.mode);
-    if (m->codage.codeop == POP)
-        return checkModesPOP(m->codage.mode);
-    if (m->codage.codeop == HALT)
-        return checkModesHALT(m->codage.mode);
+    return instrs[m->codage.codeop].modes & (1 << m->codage.mode);
+}
 
-    return false;
+bool sivm_new(SIVM *sivm)
+{
+    unsigned int i;
+
+    sivm->pc = 0;
+    sivm->sp = 0;
+    sivm->sr = 0;
+
+    for (i = 0; i < NREGS; i++)
+        sivm->reg[i] = 0;
+    for (i = 0; i < MEMSIZE; i++)
+        sivm->mem[i].brut = 0;
+
+    return true;
+}
+
+bool sivm_load(SIVM *sivm, int memsize, mot mem[memsize])
+{
+    unsigned int i;
+    for (i = 0; i < memsize; i++)
+        sivm->mem[i] = mem[i];
+
+    return true;
+}
+
+bool sivm_instr(SIVM *sivm, mot *m)
+{
+    return instrs[m->codage.codeop].function(sivm, m);
+}
+
+bool sivm_step(SIVM *sivm)
+{
+    mot *m = &sivm->mem[sivm->pc];
+
+    /* stop the vm */
+    if (m->codage.codeop == HALT)
+        return false;
+
+    if (!checkModes(m))
+        return false;
+
+    return sivm_instr(sivm, m);
+}
+
+void sivm_status(SIVM *sivm)
+{
+    printf("==> Status <==\n");
+    unsigned int i;
+    for (i = 0; i < NREGS; ++i)
+        printf("\tREG[%d] = %d\n", i, sivm->reg[i]);
 }
