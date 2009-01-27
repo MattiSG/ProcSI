@@ -30,19 +30,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /usr/bin/cmake
+CMAKE_COMMAND = "/Applications/CMake 2.6-2.app/Contents/bin/cmake"
 
 # The command to remove a file.
-RM = /usr/bin/cmake -E remove -f
+RM = "/Applications/CMake 2.6-2.app/Contents/bin/cmake" -E remove -f
 
 # The program to use to edit the cache.
-CMAKE_EDIT_COMMAND = /usr/bin/ccmake
+CMAKE_EDIT_COMMAND = "/Applications/CMake 2.6-2.app/Contents/bin/ccmake"
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/tipoun/Documents/codes/emul
+CMAKE_SOURCE_DIR = "/Users/matti/Documents/Boulot/Programmation Système/procsi"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/tipoun/Documents/codes/emul
+CMAKE_BINARY_DIR = "/Users/matti/Documents/Boulot/Programmation Système/procsi"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -50,7 +50,7 @@ CMAKE_BINARY_DIR = /home/tipoun/Documents/codes/emul
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	"/Applications/CMake 2.6-2.app/Contents/bin/ccmake" -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -60,7 +60,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	"/Applications/CMake 2.6-2.app/Contents/bin/cmake" -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -69,9 +69,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tipoun/Documents/codes/emul/CMakeFiles /home/tipoun/Documents/codes/emul/CMakeFiles/progress.make
+	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/matti/Documents/Boulot/Programmation Système/procsi/CMakeFiles" "/Users/matti/Documents/Boulot/Programmation Système/procsi/CMakeFiles/progress.make"
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tipoun/Documents/codes/emul/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/matti/Documents/Boulot/Programmation Système/procsi/CMakeFiles" 0
 .PHONY : all
 
 # The main clean target
@@ -124,6 +124,30 @@ main/fast:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+src/instructions.o: src/instructions.c.o
+.PHONY : src/instructions.o
+
+# target to build an object file
+src/instructions.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/instructions.c.o
+.PHONY : src/instructions.c.o
+
+src/instructions.i: src/instructions.c.i
+.PHONY : src/instructions.i
+
+# target to preprocess a source file
+src/instructions.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/instructions.c.i
+.PHONY : src/instructions.c.i
+
+src/instructions.s: src/instructions.c.s
+.PHONY : src/instructions.s
+
+# target to generate assembly for a file
+src/instructions.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/instructions.c.s
+.PHONY : src/instructions.c.s
+
 src/main.o: src/main.c.o
 .PHONY : src/main.o
 
@@ -148,29 +172,29 @@ src/main.c.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.c.s
 .PHONY : src/main.c.s
 
-src/mot.o: src/mot.c.o
-.PHONY : src/mot.o
+src/sivm.o: src/sivm.c.o
+.PHONY : src/sivm.o
 
 # target to build an object file
-src/mot.c.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/mot.c.o
-.PHONY : src/mot.c.o
+src/sivm.c.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/sivm.c.o
+.PHONY : src/sivm.c.o
 
-src/mot.i: src/mot.c.i
-.PHONY : src/mot.i
+src/sivm.i: src/sivm.c.i
+.PHONY : src/sivm.i
 
 # target to preprocess a source file
-src/mot.c.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/mot.c.i
-.PHONY : src/mot.c.i
+src/sivm.c.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/sivm.c.i
+.PHONY : src/sivm.c.i
 
-src/mot.s: src/mot.c.s
-.PHONY : src/mot.s
+src/sivm.s: src/sivm.c.s
+.PHONY : src/sivm.s
 
 # target to generate assembly for a file
-src/mot.c.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/mot.c.s
-.PHONY : src/mot.c.s
+src/sivm.c.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/sivm.c.s
+.PHONY : src/sivm.c.s
 
 src/util.o: src/util.c.o
 .PHONY : src/util.o
@@ -206,12 +230,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... main"
 	@echo "... rebuild_cache"
+	@echo "... src/instructions.o"
+	@echo "... src/instructions.i"
+	@echo "... src/instructions.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... src/mot.o"
-	@echo "... src/mot.i"
-	@echo "... src/mot.s"
+	@echo "... src/sivm.o"
+	@echo "... src/sivm.i"
+	@echo "... src/sivm.s"
 	@echo "... src/util.o"
 	@echo "... src/util.i"
 	@echo "... src/util.s"

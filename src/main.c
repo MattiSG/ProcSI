@@ -1,8 +1,4 @@
 /**
- *
- *  Questions :
- *  1) Quelles options de compilations doit-on utiliser (std=c99, Wall, Werror, ansi) ?
- *  2) Quel est le mode pour le jmp ?
  *  
  *  SR reçoit le calcul après chaque instruction de calcul : ADD, SUB
  *
@@ -19,7 +15,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "mot.h"
+#include "sivm.h"
+#include "instructions.h"
 #include "util.h"
 
 
