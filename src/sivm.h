@@ -1,5 +1,5 @@
-#ifndef MOT_H
-#define MOT_H
+#ifndef SIVM_H
+#define SIVM_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -8,8 +8,19 @@
 
 typedef uint16_t REG;
 
+/**@name	SIVM parameters*/
+//@{
+/**Number of registers in an SIVM.*/
 #define NREGS 8
+/**Size of an SIVM's memory*/
 #define MEMSIZE (UINT16_MAX + 1)
+/**PC index at SIVM startup*/
+#define PC_START 0
+/**SR index at SIVM startup*/
+#define SR_START 0
+/**SP index at SIVM startup*/
+#define SP_START 0
+//@}
 
 typedef union
 {
@@ -36,10 +47,9 @@ typedef struct {
  * \brief Initializes a new ProcSI virtual machine
  * \author Me
  */
-bool sivm_new(SIVM *sivm);
+void sivm_new(SIVM *sivm);
 bool sivm_load(SIVM *sivm, int memsize, mot mem[memsize]);
 bool sivm_step(SIVM *sivm);
 void sivm_status(SIVM *sivm);
-bool sivm_exec(SIVM *sivm, mot *word);
 
-#endif /*MOT_H*/
+#endif /*SIVM_H*/

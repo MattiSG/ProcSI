@@ -15,7 +15,11 @@ typedef enum
 	DIRIMM = 0x5,
 	DIRREG = 0x1,
 	INDIMM = 0x6,
-	INDREG = 0x2
+	INDREG = 0x2,
+	REGISTER,
+	IMMEDIATE,
+	DIRECT,
+	INDIRECT
 } mode;
 
 enum instruction
@@ -47,7 +51,7 @@ typedef enum
 
 
 typedef struct {
-    bool (*function)(SIVM *sivm, const REG dest, const mot source);
+    bool (*function)(SIVM *sivm, REG *dest, const mot source);
     f_mode modes;
 } Instr;
 
