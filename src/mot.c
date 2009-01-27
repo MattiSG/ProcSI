@@ -12,13 +12,11 @@ bool instr_load(SIVM *sivm, mot *m)
     case REGIND:
         break;
     }
-    sivm->pc++;
     return true;
 }
 
 bool instr_store(SIVM *sivm, mot *m)
 {
-    sivm->pc++;
     return false;
 }
 
@@ -33,7 +31,6 @@ bool instr_add(SIVM *sivm, mot *m)
         sivm->reg[m->codage.dest] += m->codage.source;
         break;
     }
-    sivm->pc++;
     return true;
 }
 
@@ -75,6 +72,7 @@ bool sivm_load(SIVM *sivm, int memsize, mot mem[memsize])
 
 bool sivm_instr(SIVM *sivm, mot *m)
 {
+    sivm->pc++;
     return instrs[m->codage.codeop].function(sivm, m);
 }
 
