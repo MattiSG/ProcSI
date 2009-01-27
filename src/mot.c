@@ -36,7 +36,7 @@ bool instr_add(SIVM *sivm, mot *m)
 
 Instr instrs[] = {
     [LOAD] = {instr_load, FM_REGDIR | FM_REGIMM | FM_REGIND},
-    [STORE] = {instr_store, FM_DIRIMM | FM_DIRREG | FM_INDIMM | INDREG},
+    [STORE] = {instr_store, FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG},
     [ADD] = {instr_add, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND}
 };
 
