@@ -7,6 +7,8 @@
  *  Faire le debugger pas à pas + affichage des variables.
  *  Afficher aussi l'instruction lisible : ADD R1,R2 (par exemple)
  *
+ *  Faire les erreurs d'éxecution
+ *
  */
 
 
