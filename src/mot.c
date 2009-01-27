@@ -47,15 +47,13 @@ bool checkModes(mot *m)
 
 bool sivm_new(SIVM *sivm)
 {
-    unsigned int i;
-
     sivm->pc = 0;
     sivm->sp = 0;
     sivm->sr = 0;
 
-    for (i = 0; i < NREGS; i++)
+    for (unsigned int i = 0; i < NREGS; i++)
         sivm->reg[i] = 0;
-    for (i = 0; i < MEMSIZE; i++)
+    for (unsigned int i = 0; i < MEMSIZE; i++)
         sivm->mem[i].brut = 0;
 
     return true;
@@ -63,8 +61,7 @@ bool sivm_new(SIVM *sivm)
 
 bool sivm_load(SIVM *sivm, int memsize, mot mem[memsize])
 {
-    unsigned int i;
-    for (i = 0; i < memsize; i++)
+    for (unsigned int i = 0; i < memsize; i++)
         sivm->mem[i] = mem[i];
 
     return true;
@@ -93,7 +90,6 @@ bool sivm_step(SIVM *sivm)
 void sivm_status(SIVM *sivm)
 {
     printf("==> Status <==\n");
-    unsigned int i;
-    for (i = 0; i < NREGS; ++i)
+    for (unsigned int i = 0; i < NREGS; ++i)
         printf("\tREG[%d] = %d\n", i, sivm->reg[i]);
 }

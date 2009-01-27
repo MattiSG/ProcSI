@@ -2,7 +2,14 @@
  *
  *  Questions :
  *  1) Quelles options de compilations doit-on utiliser (std=c99, Wall, Werror, ansi) ?
- * TODO
+ *  2) Quel est le mode pour le jmp ?
+ *  
+ *  SR reçoit le calcul après chaque instruction de calcul : ADD, SUB
+ *
+ *  Si codage en 3 mots, le 2ème mot est la src et le 3ème la dest.
+ *
+ *  Faire le debugger pas à pas + affichage des variables.
+ *  Afficher aussi l'instruction lisible : ADD R1,R2 (par exemple)
  *
  */
 
@@ -25,6 +32,15 @@ int main(int argc, char *argv[])
         { .codage = { ADD, REGREG, 3, 4 }},
         { .codage = { ADD, REGREG, 4, 1 }}
     };
+    /*
+    mot prgtest[] = {
+        { .codage = { ADD,  REGREG, 3, 4 }},
+        { .codage = { LOAD, REGDIR, 0, 2 }},
+        { .brut   =   1000                },
+        { .codage = { JMP,  REGIMM       }},
+        { .brut   =   1500                }
+    };
+    */
 
     sivm_new(&sivm);
     sivm_load(&sivm, sizeof(prgtest) / sizeof(prgtest[0]), prgtest);
@@ -34,34 +50,5 @@ int main(int argc, char *argv[])
     while (sivm_step(&sivm)) {}
     sivm_status(&sivm);
 
-    /*
-    mot mem[] = {
-        { .codage = { ADD,  REGREG, 3, 4 }},
-        { .codage = { LOAD, REGDIR, 0, 2 }},
-        { .brut   =   1000                },
-        { .codage = { JMP,  REGIMM       }},
-        { .brut   =   1500                }
-    };
-    //displayStatus();
-    unsigned int i;
-    unsigned int taille = sizeof(mem)/sizeof(mot);
-    for (i = 0; i < taille; ++i)
-    {
-        mot *m = &mem[i];
-        
-        if (!checkModes(m))
-            quit("mode incorrect");
-
-        if (m->codage.codeop == ADD)
-        {
-            if (m->codage.mode == REGREG)
-                REG[m->codage.dest] += REG[m->codage.source];
-            else if (m->codage.mode == REGIMM)
-                REG[m->codage.dest] += m->codage.source;
-        }
-    }
-
-    displayStatus();
-*/
     return 0;
 }

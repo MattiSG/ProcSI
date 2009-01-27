@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project("Émulateur PROCSI")
 set(EXECUTABLE_OUTPUT_PATH bin)
-set(CMAKE_C_FLAGS "-Wall -Werror -std=c99 -ansi")
+set(CMAKE_C_FLAGS "-Wall -Werror -std=c99")
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
