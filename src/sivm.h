@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
+
 
 typedef uint16_t REG;
 
@@ -56,5 +58,7 @@ void sivm_new(SIVM *sivm);
 bool sivm_load(SIVM *sivm, int memsize, mot mem[memsize]);
 bool sivm_step(SIVM *sivm);
 void sivm_status(SIVM *sivm);
+
+void sivm_get_instruction_string(SIVM *sivm, char *buffer);
 
 #endif /*SIVM_H*/

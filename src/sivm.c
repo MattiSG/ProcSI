@@ -54,7 +54,7 @@ bool sivm_exec(SIVM *, mot *);
 bool checkMemoryAccess(REG index)
 {
 	if (index > MEMSIZE) {
-		quit("Invalid memory access (too high!)");
+		logm("Invalid memory access (too high!)", 0);
 		return false;
 	}
 	return true;
@@ -66,7 +66,7 @@ bool checkMemoryAccess(REG index)
 bool checkRegisterAccess(unsigned index)
 {
 	if (index >= NREGS) {
-		quit("Invalid register access (too high!)");
+		logm("Invalid register access (too high!)", 0);
 		return false;
 	}
 	return true;
@@ -108,7 +108,7 @@ bool sivm_step(SIVM *sivm)
 bool increment_PC(SIVM *sivm)
 {
 	
-	if (sivm->pc < MEMSIZE) {
+	if (checkMemoryAccess(sivm->pc)) {
 		sivm->pc++;
 		return true;
 	}
@@ -116,53 +116,129 @@ bool increment_PC(SIVM *sivm)
 	return false;
 }
 
+/**Computes the destination and source adressing modes from a command word.
+ *@param	word	the command word from which to compute adressing modes
+ *@param	destMode	pointer to the destination mode variable
+ *@param	sourceMode	pointer to the source mode variable
+ *@return	false if the given modes are illegal
+ */
+bool getModes(mot *word, mode *destMode, mode *sourceMode)
+{
+	switch (word->codage.mode) {
+		case REGREG:
+			*destMode = REGISTER;
+			*sourceMode = REGISTER;
+			break;
+		case REGIMM:
+			*destMode = REGISTER;
+			*sourceMode = IMMEDIATE;
+			break;
+		case REGDIR:
+			*destMode = REGISTER;
+			*sourceMode = DIRECT;
+			break;
+		case REGIND:
+			*destMode = REGISTER;
+			*sourceMode = INDIRECT;
+			break;
+		case DIRIMM:
+			*destMode = DIRECT;
+			*sourceMode = IMMEDIATE;
+			break;
+		case DIRREG:
+			*destMode = DIRECT;
+			*sourceMode = IMMEDIATE;
+			break;
+		case INDIMM:
+			*destMode = INDIRECT;
+			*sourceMode = IMMEDIATE;
+			break;
+		case INDREG:
+			*destMode = INDIRECT;
+			*sourceMode = REGISTER;
+			break;
+		default:
+			logm("Invalid adressing mode", 0);
+			return false;
+	}
+	return true;
+}
+
+/**Computes the destination and source from a command word.
+ *@param	sivm	the VM in which to get the parameters
+ *@param	word	the command word from which to compute parameters
+ *@param	dest	pointer to the destination parameter
+ *@param	source	pointer to the source parameter
+ *@return	false if the given modes are illegal
+ *
+bool getParameters(SIVM *sivm, mot *word, REG **dest, mot *source)
+{
+	mode destMode, srcMode;
+	getModes(word, &destMode, &srcMode);
+	
+	switch (destMode) {
+		case REGISTER:
+			checkRegisterAccess(word->codage.dest);
+			*dest = &sivm->reg[word->codage.dest];
+			break;
+		case IMMEDIATE:
+			logm("Invalid adressing mode: cannot assign to an immediate value!", 0);
+			return false;
+			break;
+		case DIRECT:
+			increment_PC(sivm);
+			checkMemoryAccess(sivm->pc);
+			*dest = &(sivm->mem[sivm->pc].brut);
+			break;
+		case INDIRECT:
+			checkMemoryAccess(sivm->reg[word->codage.dest]);
+			*dest = &(sivm->mem[sivm->reg[word->codage.dest]].brut);
+			break;
+		default:
+			logm("Invalid destination adressing mode", 0);
+			return false;
+	}
+	printf("dest = %d", **dest);
+	
+	switch (srcMode) {
+		case REGISTER:
+			checkRegisterAccess(word->codage.dest);
+			source = (mot*) &sivm->reg[word->codage.source];
+			break;
+		case IMMEDIATE:
+			increment_PC(sivm);
+			source = &sivm->mem[sivm->pc];
+			break;
+		case DIRECT:
+			increment_PC(sivm);
+			checkMemoryAccess(sivm->pc);
+			source = (mot*) &sivm->mem[sivm->pc].brut;
+			break;
+		case INDIRECT:
+			checkMemoryAccess(sivm->reg[word->codage.dest]);
+			source = &sivm->mem[sivm->reg[word->codage.source]];
+			break;
+		default:
+			logm("Invalid source adressing mode", 0);
+			return false;
+	}
+	return true;
+}
+*/
 /**Executes the given word in the given SIVM.
  *Checks for invalid adressing modes.
  *@returns	true if the instruction was correctly executed.
  */
 bool sivm_exec(SIVM *sivm, mot *word)
 {	
-	Instr instr = getInstruction(word);
-	mode destMode, srcMode;
+	Instr instr = getInstruction(*word);
 	REG *dest;
 	mot source;
 	
-	switch (word->codage.mode) {
-		case REGREG:
-			destMode = REGISTER;
-			srcMode = REGISTER;
-			break;
-		case REGIMM:
-			destMode = REGISTER;
-			srcMode = IMMEDIATE;
-			break;
-		case REGDIR:
-			destMode = REGISTER;
-			srcMode = DIRECT;
-			break;
-		case REGIND:
-			destMode = REGISTER;
-			srcMode = INDIRECT;
-			break;
-		case DIRIMM:
-			destMode = DIRECT;
-			srcMode = IMMEDIATE;
-			break;
-		case DIRREG:
-			destMode = DIRECT;
-			srcMode = IMMEDIATE;
-			break;
-		case INDIMM:
-			destMode = INDIRECT;
-			srcMode = IMMEDIATE;
-			break;
-		case INDREG:
-			destMode = INDIRECT;
-			srcMode = REGISTER;
-			break;
-		default:
-			quit("Invalid opcode");
-	}
+//	getParameters(sivm, word, &dest, &source);
+	
+	mode destMode, srcMode;
+	getModes(word, &destMode, &srcMode);
 
 	switch (destMode) {
 		case REGISTER:
@@ -170,7 +246,8 @@ bool sivm_exec(SIVM *sivm, mot *word)
 			dest = &sivm->reg[word->codage.dest];
 			break;
 		case IMMEDIATE:
-			quit("Cannot assign to an immediate value!");
+			logm("Invalid adressing mode: cannot assign to an immediate value!", 0);
+			return false;
 			break;
 		case DIRECT:
 			increment_PC(sivm);
@@ -182,9 +259,10 @@ bool sivm_exec(SIVM *sivm, mot *word)
 			dest = &(sivm->mem[sivm->reg[word->codage.dest]].brut);
 			break;
 		default:
-			quit("Invalid destination adressing mode");
+			logm("Invalid destination adressing mode", 0);
+			return false;
 	}
-
+	
 	switch (srcMode) {
 		case REGISTER:
 			checkRegisterAccess(word->codage.dest);
@@ -204,9 +282,11 @@ bool sivm_exec(SIVM *sivm, mot *word)
 			source = sivm->mem[sivm->reg[word->codage.source]];
 			break;
 		default:
-			quit("Invalid source adressing mode");
+			logm("Invalid source adressing mode", 0);
+			return false;
 	}
-
+	
+	logm(instr.name, 5);
 	if (instr.function(sivm, dest, source)) {
 		logm("Instruction successful", 5);
 		return true;
@@ -218,6 +298,8 @@ bool sivm_exec(SIVM *sivm, mot *word)
 //@}
 
 
+/**@name	SIVM status inquiry*/
+//@{
 /**Prints the given SIVM's registers values.
  */
 void sivm_status(SIVM *sivm)
@@ -229,3 +311,20 @@ void sivm_status(SIVM *sivm)
     for (unsigned int i = 0; i < NREGS; ++i)
         printf("\tREG[%d] = %d\n", i, sivm->reg[i]);
 }
+
+/**Returns the given SIVM's current instruction.*/
+Instr sivm_get_instruction(SIVM *sivm)
+{
+	checkMemoryAccess(sivm->pc);
+	return getInstruction(sivm->mem[sivm->pc]);
+}
+
+/**Fills a string with the given SIVM's current instruction in a human-readable form.*/
+void sivm_get_instruction_string(SIVM *sivm, char *buffer)
+{
+	Instr instr = sivm_get_instruction(sivm);
+	strcpy(buffer, instr.name);
+	strcpy(buffer, "\t");
+	
+}
+//@}

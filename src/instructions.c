@@ -10,7 +10,6 @@
  */
 bool instr_load(SIVM *sivm, REG *dest, const mot source)
 {
-	logm("LOAD", 5);
 	*dest = source.brut;
     return true;
 }
@@ -20,7 +19,6 @@ bool instr_load(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_store(SIVM *sivm, REG *dest, const mot source)
 {
-	logm("STR", 5);
 	*dest = source.brut;
     return true;
 }
@@ -30,7 +28,6 @@ bool instr_store(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_add(SIVM *sivm, REG *dest, const mot source)
 {
-	logm("ADD", 5);
 	*dest += source.brut;
 	sivm->sr = *dest;
     return true;
@@ -41,7 +38,6 @@ bool instr_add(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_sub(SIVM *sivm, REG *dest, const mot source)
 {
-	logm("SUB", 5);
 	*dest -= source.brut;
 	sivm->sr = *dest;
     return true;
@@ -56,7 +52,6 @@ bool instr_sub(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_jmp(SIVM *sivm, REG *dest, const mot source)
 {
-	logm("JMP", 5);
 	if (source.brut > MEMSIZE) {
 		logm("Jumping too far!", 0);
 		return false;
@@ -65,12 +60,62 @@ bool instr_jmp(SIVM *sivm, REG *dest, const mot source)
     return true;
 }
 
+/**Emulates the JEQ command in the given SIVM.
+ *@see	instr_jmp
+ */
+bool instr_jeq(SIVM *sivm, REG *dest, const mot source)
+{
+	if (sivm->sr == 0)
+		return instr_jmp(sivm, dest, source);
+    return false;
+}
+
+/**Emulates the PUSH command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_push(SIVM *sivm, REG *dest, const mot source)
+{
+	int newSp = sivm->sp + SP_INCR;
+	if (newSp > MEMSIZE || newSp < 0) {
+		logm("Stack pointer after incrementation is illegal", 0);
+		return false;
+	}
+	sivm->mem[newSp] = source;
+	sivm->sp = newSp;
+	return true;
+}
+
+/**Emulates the POP command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_pop(SIVM *sivm, REG *dest, const mot source)
+{
+	int newSp = sivm->sp - SP_INCR;
+	if (newSp > MEMSIZE || newSp < 0) {
+		logm("Stack pointer inconsistency", 0);
+		return false;
+	}
+	*dest = source.brut;
+	sivm->sp = newSp;
+	return true;
+}
+
+///**Emulates the CALL command in the given SIVM.
+// *@see	instr_jmp
+// */
+//bool instr_call(SIVM *sivm, REG *dest, const mot source)
+//{
+//	while (<#condition#>) {
+//		<#statements#>
+//	}
+//	return instr_jmp(sivm, dest, source);
+//}
+
 /**Emulates the MOV command in the given SIVM.
  *@return	true if the command was successful.
  */
 bool instr_mov(SIVM *sivm, REG *dest, const mot source)
 {
-	logm("MOV", 5);
 	*dest = source.brut;
 	sivm->sr = *dest;
     return true;
@@ -88,12 +133,13 @@ bool instr_mov(SIVM *sivm, REG *dest, const mot source)
  *@see	getInstruction
  */
 Instr instructions[] = {
-	[LOAD] = {instr_load, FM_REGDIR | FM_REGIMM | FM_REGIND},
-	[STORE] = {instr_store, FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG},
-	[ADD] = {instr_add, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND},
-	[SUB] = {instr_sub, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND},
-	[JMP] = {instr_jmp, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND},
-	[MOV] = {instr_mov, FM_REGREG | FM_REGIMM}
+	[LOAD] = {instr_load,	FM_REGDIR | FM_REGIMM | FM_REGIND,				"LOAD"},
+	[STORE] = {instr_store,	FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"STORE"},
+	[ADD] = {instr_add,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"ADD"},
+	[SUB] = {instr_sub,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SUB"},
+	[JMP] = {instr_jmp,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JMP"},
+	[JEQ] = {instr_jeq,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
+	[MOV] = {instr_mov,		FM_REGREG | FM_REGIMM,							"MOV"}
 };
 
 //@}
@@ -103,16 +149,16 @@ Instr instructions[] = {
  *The whole instruction word is tested, in order to determine whether the adressing modes used in it are legal for the instruction it contains.
  *@return	true if the adressing modes are legal.
  */
-bool checkModes(mot *m)
+bool checkModes(const mot m)
 {
-    return getInstruction(m).modes & (1 << m->codage.mode);
+    return getInstruction(m).modes & (1 << m.codage.mode);
 }
 
 /**Returns the instruction encoded in the given word.
  *This accessor is an interface to the private "instructions" array.
  *@see	instructions.h#Instr
  */
-Instr getInstruction(mot *m)
+Instr getInstruction(const mot m)
 {
-	return instructions[m->codage.codeop];
+	return instructions[m.codage.codeop];
 }

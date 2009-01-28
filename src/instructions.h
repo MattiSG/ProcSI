@@ -70,10 +70,11 @@ typedef enum
 typedef struct {
     bool (*function)(SIVM *sivm, REG *dest, const mot source);
     f_mode modes;
+	char* name;
 } Instr;
 
-bool checkModes(mot *m);
+bool checkModes(const mot m);
 
-Instr getInstruction(mot *m);
+Instr getInstruction(const mot m);
 
 #endif

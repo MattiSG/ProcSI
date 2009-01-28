@@ -22,7 +22,7 @@ bool readLine(char *str, size_t length)
     char c;
     while (((c = getchar()) != '\n') && c != EOF);
 
-    return ret == 1 ? true : false;
+    return ret == 1;
 }
 
 void logm(char *msg, char level)
