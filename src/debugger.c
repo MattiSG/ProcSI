@@ -5,8 +5,16 @@
 #include "instructions.h"
 #include "util.h"
 
-bool step_by_step = false;
-bool stop = false;
+typedef enum
+{
+    RUN,
+    STEP,
+    QUIT,
+    BREAKPOINT,
+    DISPLAY,
+    RESTART,
+    HELP
+} commands;
 
 void debugger_new(Debugger *debug)
 {
@@ -15,14 +23,17 @@ void debugger_new(Debugger *debug)
 
 void debugger_start(Debugger *debug)
 {
+    /*
     printf("Quel fichier voulez-vous utiliser ? ");
     fflush(stdout);
 
     char filename[LINE_MAX];
     readLine(filename, LINE_MAX);
     printf("Fichier : \"%s\"\n", filename);
+    */
 
     /* mot prg = analyzer(filename); */
+
     /*
     mot prg[] = {
         { .codage = { ADD,  REGREG, 3, 4 }},
@@ -46,16 +57,9 @@ void debugger_start(Debugger *debug)
 		sivm_status(&debug->sivm);
 }
 
-typedef enum
-{
-    RUN,
-    STEP,
-    QUIT,
-    BREAKPOINT,
-    DISPLAY,
-    RESTART,
-    HELP
-} commands;
+bool step_by_step = false;
+bool stop = false;
+
 
 int parse_command(char *cmd)
 {
