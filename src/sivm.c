@@ -36,7 +36,7 @@ bool sivm_load(SIVM *sivm, int memsize, mot mem[memsize])
 //@}
 
 
-void increment_PC(SIVM *);
+bool increment_PC(SIVM *);
 
 bool sivm_exec(SIVM *, mot *);
 
@@ -45,11 +45,14 @@ bool sivm_exec(SIVM *, mot *);
 
 /**Executes the next instruction in the given SIVM.
  *@see	sivm_exec
+ *@see	increment_PC
  *@returns	true if the instruction was correctly executed, false if the SIVM has to stop (whether on HALT instruction or because of a bad instruction).
  */
 bool sivm_step(SIVM *sivm)
 {
-	increment_PC(sivm);
+	if (! increment_PC(sivm))
+		quit("sivm_step:\nPC too high !");
+	
     mot *m = &sivm->mem[sivm->pc];
 
     /* stop the vm */
@@ -61,13 +64,17 @@ bool sivm_step(SIVM *sivm)
 
 /**Handles PC incrementation for an SIVM.
  *Also checks for PC validity, which is why you shouldn't increment PC by hand.
+ *@returns	false if PC can't be incremented anymore (ie current PC >= MEMSIZE)
  */
-void increment_PC(SIVM *sivm)
+bool increment_PC(SIVM *sivm)
 {
-	if (sivm->pc + 1 <= MEMSIZE)
+	
+	if (sivm->pc < MEMSIZE) {
 		sivm->pc++;
-	else
-		quit("PC too high !");
+		return true;
+	}
+	logm("PC too high !", 0);
+	return false;
 }
 
 /**Executes the given word in the given SIVM.
@@ -154,17 +161,19 @@ bool sivm_exec(SIVM *sivm, mot *word)
 			quit("Invalid source adressing mode");
 	}
 	
-	bool result = instr.function(sivm, dest, source);
-	
-	if (result) sivm->sr = *dest;
-	return result;
+	return instr.function(sivm, dest, source);
 }
 //@}
 
 
+/**Prints the given SIVM's registers values.
+ */
 void sivm_status(SIVM *sivm)
 {
     printf("==> Status <==\n");
+	printf("\tPC = %d\n", sivm->pc);
+	printf("\tSR = %d\n", sivm->sr);
+ 	printf("\tSP = %d\n", sivm->sp);
     for (unsigned int i = 0; i < NREGS; ++i)
         printf("\tREG[%d] = %d\n", i, sivm->reg[i]);
 }

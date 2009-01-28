@@ -29,7 +29,8 @@ int main(int argc, char *argv[])
     
     mot prgtest[] = {
         { .codage = { ADD, REGREG, 3, 4 }},
-        { .codage = { ADD, REGREG, 4, 1 }}
+        { .codage = { ADD, REGREG, 4, 1 }},
+		{ .codage = { HALT				}}
     };
     /*
     mot prgtest[] = {

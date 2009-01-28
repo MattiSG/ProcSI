@@ -10,6 +10,7 @@
  */
 bool instr_load(SIVM *sivm, REG *dest, const mot source)
 {
+	logm("LOAD", 5);
 	*dest = source.brut;
     return true;
 }
@@ -19,6 +20,7 @@ bool instr_load(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_store(SIVM *sivm, REG *dest, const mot source)
 {
+	logm("STR", 5);
 	*dest = source.brut;
     return true;
 }
@@ -28,6 +30,7 @@ bool instr_store(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_add(SIVM *sivm, REG *dest, const mot source)
 {
+	logm("ADD", 5);
 	*dest += source.brut;
 	sivm->sr = *dest;
     return true;
@@ -38,11 +41,26 @@ bool instr_add(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_sub(SIVM *sivm, REG *dest, const mot source)
 {
+	logm("SUB", 5);
 	*dest -= source.brut;
 	sivm->sr = *dest;
     return true;
 }
 
+/**Emulates the JMP command in the given SIVM.
+ *This instruction takes only one parameter above the targeted SIVM, dest, but keeps the source argument for type compatibility.
+ *Argument validity will be checked.
+ *@param	dest	the adress at which the PC register of the given SIVM should be put at.
+ *@return	true if the command was successful, false if the PC argument is out of memory bounds.
+ */
+bool instr_jmp(SIVM *sivm, REG *dest, const mot source)
+{
+	if (&source)
+		logm("Third parameter of instr_jmp not null while it's useless", 4);
+	if (*dest > MEMSIZE) return false;
+	sivm->pc = *dest;
+    return true;
+}
 
 /**Describes all available instructions.
  *This array has keys taken from the "instructions" enum, and its values describe the corresponding instructions, as an array containing :

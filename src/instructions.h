@@ -7,25 +7,27 @@
 
 /**Lists all available instructions.
  *The value of the enum elements are the opcodes for the given instruction.
+ *Some values are given according to the A.A. courses documents, others are given arbitrarily.
  */
 enum instructions
 {
-    LOAD = 0,
-    STORE,
-    ADD,
-    SUB,
-    JMP,
-    JEQ,
-    CALL,
-    RET,
-    PUSH,
-    POP,
-    HALT
+    LOAD =	0x8, //ref: TD2 A.A.
+    STORE =	0x9, //ref: TD2 A.A.
+    ADD =	0x0, //ref: TD2 A.A.
+    SUB =	0x1, //ref: TD2 A.A.
+    JMP =	0x2, //no ref from now on
+    JEQ =	0x3,
+    CALL =	0x4,
+    RET =	0x5,
+    PUSH =	0x6,
+    POP =	0x7,
+    HALT =	0xF
 };
 
 /**@name	Adressing modes*/
 //@{
 /**Lists all available adressing modes.
+ *The reference for the values is the document "Description de PROCSI" that was given to us in the A.A. courses.
  *TODO: Should be refactored to single-type adressing modes only.
  */
 typedef enum

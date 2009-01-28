@@ -13,7 +13,7 @@ typedef uint16_t REG;
 /**Number of registers in an SIVM.*/
 #define NREGS 8
 /**Size of an SIVM's memory*/
-#define MEMSIZE (UINT16_MAX + 1)
+#define MEMSIZE 128
 /**PC index at SIVM startup*/
 #define PC_START 0
 /**SR index at SIVM startup*/
