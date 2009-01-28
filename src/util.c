@@ -27,8 +27,8 @@ bool readLine(char *str, size_t length)
 
 void logm(char *msg, char level)
 {
-	if (level >= OUT_LOG_LEVEL)
+	if (level <= OUT_LOG_LEVEL)
 	    fprintf(stdout, "%s\n", msg);
-	else if (level >= ERR_LOG_LEVEL)
+	else if (level <= ERR_LOG_LEVEL)
 	    fprintf(stderr, "%s\n", msg);
 }

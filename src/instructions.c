@@ -48,19 +48,31 @@ bool instr_sub(SIVM *sivm, REG *dest, const mot source)
 }
 
 /**Emulates the JMP command in the given SIVM.
- *This instruction takes only one parameter above the targeted SIVM, dest, but keeps the source argument for type compatibility.
+ *This instruction takes only one parameter above the targeted SIVM, source, but keeps the dest argument for type compatibility.
+ *<strong>WARNING</strong> the argument to use is <strong>source</strong> and not dest.
  *Argument validity will be checked.
- *@param	dest	the adress at which the PC register of the given SIVM should be put at.
+ *@param	source	the adress at which the PC register of the given SIVM should be put at.
  *@return	true if the command was successful, false if the PC argument is out of memory bounds.
  */
 bool instr_jmp(SIVM *sivm, REG *dest, const mot source)
 {
-    /* TODO inutile normalement
-	if (&source)
-		logm("Third parameter of instr_jmp not null while it's useless", 4);
-    */
-	if (*dest > MEMSIZE) return false;
-	sivm->pc = *dest;
+	logm("JMP", 5);
+	if (source.brut > MEMSIZE) {
+		logm("Jumping too far!", 0);
+		return false;
+	}
+	sivm->pc = source.brut;
+    return true;
+}
+
+/**Emulates the MOV command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_mov(SIVM *sivm, REG *dest, const mot source)
+{
+	logm("MOV", 5);
+	*dest = source.brut;
+	sivm->sr = *dest;
     return true;
 }
 
@@ -79,7 +91,9 @@ Instr instructions[] = {
 	[LOAD] = {instr_load, FM_REGDIR | FM_REGIMM | FM_REGIND},
 	[STORE] = {instr_store, FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG},
 	[ADD] = {instr_add, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND},
-	[SUB] = {instr_sub, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND}
+	[SUB] = {instr_sub, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND},
+	[JMP] = {instr_jmp, FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND},
+	[MOV] = {instr_mov, FM_REGREG | FM_REGIMM}
 };
 
 //@}

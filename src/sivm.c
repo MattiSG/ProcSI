@@ -14,11 +14,16 @@ void sivm_new(SIVM *sivm)
     sivm->pc = PC_START;
     sivm->sp = SP_START;
     sivm->sr = SR_START;
-
+	
+	if (SP_START + SP_INCR > MEMSIZE || SP_START + SP_INCR <= 0)
+		logm("Stack init and incrementation are not in the same way, VM will crash at first push.", 0);
+	
     for (unsigned int i = 0; i < NREGS; i++)
         sivm->reg[i] = 0;
     for (unsigned int i = 0; i < MEMSIZE; i++)
         sivm->mem[i].brut = 0;
+	
+	logm("VM successfully initialized.", 2);
 }
 
 /**Loads the given program in the given SIVM.
@@ -40,6 +45,35 @@ bool increment_PC(SIVM *);
 
 bool sivm_exec(SIVM *, mot *);
 
+
+/**@name	Consistency checks*/
+//@{
+/**Checks whether the given index is legal for access to the memory.
+ *@returns	true if the access is legal.
+ */
+bool checkMemoryAccess(REG index)
+{
+	if (index > MEMSIZE) {
+		quit("Invalid memory access (too high!)");
+		return false;
+	}
+	return true;
+}
+
+/**Checks whether the given index is legal for access to a register.
+ *@returns	true if the access is legal.
+ */
+bool checkRegisterAccess(unsigned index)
+{
+	if (index >= NREGS) {
+		quit("Invalid register access (too high!)");
+		return false;
+	}
+	return true;
+}
+//@}
+
+
 /**@name	SIVM instructions execution*/
 //@{
 
@@ -50,14 +84,17 @@ bool sivm_exec(SIVM *, mot *);
  */
 bool sivm_step(SIVM *sivm)
 {
+	checkMemoryAccess(sivm->pc);
     mot *m = &sivm->mem[sivm->pc];
 
     /* stop the vm */
-    if (m->codage.codeop == HALT)
+    if (m->codage.codeop == HALT) {
+		logm("HALT instruction encountered, stopping VM.", 3);
         return false;
+	}
 	
     if (! sivm_exec(sivm, m)) return false;
-	
+
 	if (! increment_PC(sivm))
 		quit("sivm_step:\nPC too high !");
 	
@@ -126,9 +163,10 @@ bool sivm_exec(SIVM *sivm, mot *word)
 		default:
 			quit("Invalid opcode");
 	}
-	
+
 	switch (destMode) {
 		case REGISTER:
+			checkRegisterAccess(word->codage.dest);
 			dest = &sivm->reg[word->codage.dest];
 			break;
 		case IMMEDIATE:
@@ -136,17 +174,20 @@ bool sivm_exec(SIVM *sivm, mot *word)
 			break;
 		case DIRECT:
 			increment_PC(sivm);
+			checkMemoryAccess(sivm->pc);
 			dest = &(sivm->mem[sivm->pc].brut);
 			break;
 		case INDIRECT:
+			checkMemoryAccess(sivm->reg[word->codage.dest]);
 			dest = &(sivm->mem[sivm->reg[word->codage.dest]].brut);
 			break;
 		default:
 			quit("Invalid destination adressing mode");
 	}
-	
+
 	switch (srcMode) {
 		case REGISTER:
+			checkRegisterAccess(word->codage.dest);
 			source = (mot) sivm->reg[word->codage.source];
 			break;
 		case IMMEDIATE:
@@ -155,15 +196,17 @@ bool sivm_exec(SIVM *sivm, mot *word)
 			break;
 		case DIRECT:
 			increment_PC(sivm);
+			checkMemoryAccess(sivm->pc);
 			source = (mot) sivm->mem[sivm->pc].brut;
 			break;
 		case INDIRECT:
+			checkMemoryAccess(sivm->reg[word->codage.dest]);
 			source = sivm->mem[sivm->reg[word->codage.source]];
 			break;
 		default:
 			quit("Invalid source adressing mode");
 	}
-	
+
 	if (instr.function(sivm, dest, source)) {
 		logm("Instruction successful", 5);
 		return true;

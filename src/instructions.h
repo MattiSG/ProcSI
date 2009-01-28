@@ -21,6 +21,7 @@ enum instructions
     RET =	0x5,
     PUSH =	0x6,
     POP =	0x7,
+	MOV =	0xA,
     HALT =	0xF
 };
 
@@ -28,7 +29,9 @@ enum instructions
 //@{
 /**Lists all available adressing modes.
  *The reference for the values is the document "Description de PROCSI" that was given to us in the A.A. courses.
- *TODO: Should be refactored to single-type adressing modes only.
+ *We don't use single-type adressing modes only because it's impossible to achieve storing 5x5 possible combinations in 4 bits.
+ *The single-type adressing modes (REGISTER, IMMEDIATE, DIRECT, INDIRECT) are not for public use.
+ *@see	sivm.c#sivm_exec
  */
 typedef enum
 {

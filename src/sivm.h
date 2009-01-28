@@ -19,7 +19,12 @@ typedef uint16_t REG;
 /**SR index at SIVM startup*/
 #define SR_START 0
 /**SP index at SIVM startup*/
-#define SP_START 0
+#define SP_START MEMSIZE
+/**SP incrementation
+ *Set it to (+)1 to go through ascending adresses, -1 to go through descending adresses.
+ *Standard operation is found by setting SP_START at MEMSIZE and this variable to -1 (descending adresses).
+ */
+#define SP_INCR -1
 //@}
 
 typedef union
