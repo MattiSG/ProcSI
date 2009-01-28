@@ -14,7 +14,7 @@ bool readLine(char *str, size_t length)
     // construit la chaîne de formatage de l'entrée
     size_t t_format = 81;
     char *format = calloc(t_format, sizeof(*format));
-    snprintf(format, t_format, "%%%d[^\n]", length);
+    snprintf(format, t_format, "%%%d[^\n]", (unsigned int) length);
 
     int ret = scanf(format, str);
 
