@@ -5,7 +5,29 @@
 #include "sivm.h"
 #include "util.h"
 
+/**Lists all available instructions.
+ *The value of the enum elements are the opcodes for the given instruction.
+ */
+enum instructions
+{
+    LOAD = 0,
+    STORE,
+    ADD,
+    SUB,
+    JMP,
+    JEQ,
+    CALL,
+    RET,
+    PUSH,
+    POP,
+    HALT
+};
 
+/**@name	Adressing modes*/
+//@{
+/**Lists all available adressing modes.
+ *TODO: Should be refactored to single-type adressing modes only.
+ */
 typedef enum
 {
 	REGREG = 0x0,
@@ -22,21 +44,10 @@ typedef enum
 	INDIRECT
 } mode;
 
-enum instruction
-{
-    LOAD = 0,
-    STORE,
-    ADD,
-    SUB,
-    JMP,
-    JEQ,
-    CALL,
-    RET,
-    PUSH,
-    POP,
-    HALT
-};
-
+/**Shifted adressing modes.
+ *TODO: move to the implementation file
+ *TODO: explain clearly why this is done
+ */
 typedef enum
 {
 	FM_REGREG = 1 << REGREG,
@@ -48,6 +59,7 @@ typedef enum
 	FM_INDIMM = 1 << INDIMM,
 	FM_INDREG = 1 << INDREG
 } f_mode;
+//@}
 
 
 typedef struct {
