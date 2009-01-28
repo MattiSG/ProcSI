@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
     sivm.reg[3] = 1;
     sivm.reg[4] = 2;
     sivm_status(&sivm);
-    while (sivm_step(&sivm)) {}
-    sivm_status(&sivm);
+    while (sivm_step(&sivm))
+		sivm_status(&sivm);
 
     return 0;
 }

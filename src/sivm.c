@@ -50,16 +50,18 @@ bool sivm_exec(SIVM *, mot *);
  */
 bool sivm_step(SIVM *sivm)
 {
-	if (! increment_PC(sivm))
-		quit("sivm_step:\nPC too high !");
-	
     mot *m = &sivm->mem[sivm->pc];
 
     /* stop the vm */
     if (m->codage.codeop == HALT)
         return false;
 	
-    return sivm_exec(sivm, m);
+    if (! sivm_exec(sivm, m)) return false;
+	
+	if (! increment_PC(sivm))
+		quit("sivm_step:\nPC too high !");
+	
+	return true;
 }
 
 /**Handles PC incrementation for an SIVM.
@@ -145,23 +147,30 @@ bool sivm_exec(SIVM *sivm, mot *word)
 	
 	switch (srcMode) {
 		case REGISTER:
-			source = (mot) sivm->reg[word->codage.dest];
+			source = (mot) sivm->reg[word->codage.source];
 			break;
 		case IMMEDIATE:
 			increment_PC(sivm);
 			source = sivm->mem[sivm->pc];
 			break;
 		case DIRECT:
-			source = sivm->mem[word->codage.dest];
+			increment_PC(sivm);
+			source = (mot) sivm->mem[sivm->pc].brut;
 			break;
 		case INDIRECT:
-			source = sivm->mem[sivm->reg[word->codage.dest]];
+			source = sivm->mem[sivm->reg[word->codage.source]];
 			break;
 		default:
 			quit("Invalid source adressing mode");
 	}
 	
-	return instr.function(sivm, dest, source);
+	if (instr.function(sivm, dest, source)) {
+		logm("Instruction successful", 5);
+		return true;
+	} else {
+		logm("Instruction unsuccessful", 5);
+		return false;
+	}
 }
 //@}
 
