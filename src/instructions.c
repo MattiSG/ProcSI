@@ -55,8 +55,10 @@ bool instr_sub(SIVM *sivm, REG *dest, const mot source)
  */
 bool instr_jmp(SIVM *sivm, REG *dest, const mot source)
 {
+    /* TODO inutile normalement
 	if (&source)
 		logm("Third parameter of instr_jmp not null while it's useless", 4);
+    */
 	if (*dest > MEMSIZE) return false;
 	sivm->pc = *dest;
     return true;

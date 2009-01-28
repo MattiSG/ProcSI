@@ -11,44 +11,18 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "sivm.h"
-#include "instructions.h"
-#include "util.h"
-
-
+#include "debugger.h"
 
 int main(int argc, char *argv[])
 {
-    SIVM sivm;
-    
-    mot prgtest[] = {
-        { .codage = { ADD, REGREG, 3, 4 }},
-        { .codage = { ADD, REGREG, 4, 1 }},
-		{ .codage = { HALT				}}
-    };
-    /*
-    mot prgtest[] = {
-        { .codage = { ADD,  REGREG, 3, 4 }},
-        { .codage = { LOAD, REGDIR, 0, 2 }},
-        { .brut   =   1000                },
-        { .codage = { JMP,  REGIMM       }},
-        { .brut   =   1500                }
-    };
-    */
-
-    sivm_new(&sivm);
-    sivm_load(&sivm, sizeof(prgtest) / sizeof(prgtest[0]), prgtest);
-    sivm.reg[3] = 1;
-    sivm.reg[4] = 2;
-    sivm_status(&sivm);
-    while (sivm_step(&sivm))
-		sivm_status(&sivm);
+    Debugger debug;
+    debugger_new(&debug);
+    debugger_start(&debug);
 
     return 0;
 }

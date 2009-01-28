@@ -1,6 +1,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <stdbool.h>
+#include <string.h>
+
 /**@name	Logging levels
  *Defines the level of verbosity of the program.
  *0 is the less verbose mode (displays fatal errors only).
@@ -12,7 +15,17 @@
 #define OUT_LOG_LEVEL 5
 //@}
 
+/**Quit the programe with an error
+ *@param	msg		the error message
+ */
 void quit(char *msg);
+
+/**Read a line from the standard input
+ *@param	str		pointer to the string
+ *@param	length	size of the maximum input
+ *@return
+ */
+bool readLine(char *str, size_t length);
 
 /**Logs debugging messages.
  *@param	msg		the message to log
