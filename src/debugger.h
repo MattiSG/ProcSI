@@ -2,10 +2,12 @@
 #define DEBUGGER_H
 
 #include "sivm.h"
+#include "parser.h"
 
 typedef struct
 {
     SIVM sivm;
+    mot *program;
 } Debugger;
 
 void debugger_new(Debugger *debug);

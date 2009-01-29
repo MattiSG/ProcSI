@@ -32,7 +32,7 @@ void debugger_start(Debugger *debug)
     printf("Fichier : \"%s\"\n", filename);
     */
 
-    /* mot prg = analyzer(filename); */
+    // mot prg[MEMSIZE];
 
 	mot prg[] = {
         { .codage = { MOV, REGIMM, 3, 0 }},
@@ -45,6 +45,7 @@ void debugger_start(Debugger *debug)
         { .codage = { JMP,  REGIMM       }},
         { .brut   =   1500                }
     };
+    // sivm_parse_file(MEMSIZE, prg, "test.procsi");
 	
     sivm_load(&debug->sivm, sizeof(prg) / sizeof(mot), prg);
     sivm_status(&debug->sivm);

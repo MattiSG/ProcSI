@@ -35,14 +35,14 @@ enum instructions
  */
 typedef enum
 {
-	REGREG = 0x0,
-	REGIMM = 0x4,
-	REGDIR = 0x8,
-	REGIND = 0xC,
-	DIRIMM = 0x5,
-	DIRREG = 0x1,
-	INDIMM = 0x6,
-	INDREG = 0x2,
+	REGREG = 0x0, // 0b0000
+	REGIMM = 0x4, // 0b0100
+	REGDIR = 0x8, // 0b1000
+	REGIND = 0xC, // 0b1100
+	DIRIMM = 0x5, // 0b0100
+	DIRREG = 0x1, // 0b0001
+	INDIMM = 0x6, // 0b0110
+	INDREG = 0x2, // 0b0020
 	REGISTER,
 	IMMEDIATE,
 	DIRECT,

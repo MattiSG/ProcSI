@@ -5,7 +5,7 @@
 
 void quit(char *msg)
 {
-    fprintf(stderr, "[erreur] %s\n", msg);
+    fprintf(stderr, "[error] %s\n", msg);
     exit(1);
 }
 
