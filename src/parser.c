@@ -211,6 +211,51 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
     return true;
 }
 
+bool parse_1attrib(Parser* parser, mot m[3], unsigned int *instrsize)
+{
+    // source
+    int sdata, sreg;
+    PMode spmode;
+
+    // assert there is at least one whitespace before
+    if(!iswhitespace(*parser->cur))
+    {
+        fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
+                parser->row, parser->col, *parser->cur);
+        exit(1);
+    }
+
+    // read the source
+    if(!parse_attrib(parser, &spmode, &sdata, &sreg))
+        return false;
+    if(spmode == PM_REG || spmode == PM_IND)
+        m[0].codage.source = sreg;
+    if(spmode == PM_IMM || spmode == PM_DIR)
+        m[(*instrsize)++].brut = sdata;
+
+    for(; iswhitespace(*parser->cur);
+        parser->col++,parser->cur++)
+    {}
+
+    switch(spmode)
+    {
+    case PM_REG:
+        m[0].codage.mode = REGISTER;
+        break;
+    case PM_IMM:
+        m[0].codage.mode = IMMEDIATE;
+        break;
+    case PM_DIR:
+        m[0].codage.mode = DIRECT;
+        break;
+    case PM_IND:
+        m[0].codage.mode = INDIRECT;
+        break;
+    }
+
+    return true;
+}
+
 bool parse_2attribs(Parser* parser, mot m[3], unsigned int *instrsize)
 {
     // source
@@ -304,11 +349,72 @@ bool sivm_parse(int memsize, mot mem[memsize], char *str)
             parser.cur += strlen(instr);
             parser.col += strlen(instr);
 
+            // load SOURCE, DEST
+            if(!strcmp(instr, "load"))
+            {
+                m[0].codage.codeop = LOAD;
+                if(!parse_2attribs(&parser, m, &instrsize))
+                    return false;
+            }
+            // store SOURCE, DEST
+            if(!strcmp(instr, "store"))
+            {
+                m[0].codage.codeop = STORE;
+                if(!parse_2attribs(&parser, m, &instrsize))
+                    return false;
+            }
             // add SOURCE, DEST
             if(!strcmp(instr, "add"))
             {
                 m[0].codage.codeop = ADD;
                 if(!parse_2attribs(&parser, m, &instrsize))
+                    return false;
+            }
+            // sub SOURCE, DEST
+            if(!strcmp(instr, "sub"))
+            {
+                m[0].codage.codeop = SUB;
+                if(!parse_2attribs(&parser, m, &instrsize))
+                    return false;
+            }
+            // jmp SOURCE
+            if(!strcmp(instr, "jmp"))
+            {
+                m[0].codage.codeop = JMP;
+                if(!parse_2attribs(&parser, m, &instrsize))
+                    return false;
+            }
+            // jeq SOURCE
+            if(!strcmp(instr, "jeq"))
+            {
+                m[0].codage.codeop = JEQ;
+                if(!parse_2attribs(&parser, m, &instrsize))
+                    return false;
+            }
+            // call SOURCE
+            if(!strcmp(instr, "call"))
+            {
+                m[0].codage.codeop = CALL;
+                if(!parse_1attrib(&parser, m, &instrsize))
+                    return false;
+            }
+            // ret
+            if(!strcmp(instr, "ret"))
+            {
+                m[0].codage.codeop = RET;
+            }
+            // push SOURCE
+            if(!strcmp(instr, "push"))
+            {
+                m[0].codage.codeop = PUSH;
+                if(!parse_1attrib(&parser, m, &instrsize))
+                    return false;
+            }
+            // pop DEST
+            if(!strcmp(instr, "pop"))
+            {
+                m[0].codage.codeop = POP;
+                if(!parse_1attrib(&parser, m, &instrsize))
                     return false;
             }
             // halt
