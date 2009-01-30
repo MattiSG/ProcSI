@@ -77,3 +77,16 @@ void logm(char level, char *format, ...)
 		
     va_end(args);
 }
+
+bool superRecover(REG *val)
+{
+	printf("SuperRecover has your back!\nPlease modify the value that caused the invalid access (%d), or type nothing to continue with the fatal error: ", *val);
+	int buffer;
+	if (! scanf("%d", &buffer)) {
+		printf("Well, we tried to save you...\n");
+		return false;
+	}
+	printf("%d\n", buffer);
+	*val = (REG) buffer;
+	return true;
+}

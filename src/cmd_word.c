@@ -168,7 +168,9 @@ char* disassemble(int length, const cmd_word words[])
 	return buffer;
 }
 
-/**
+/**Disassemble one instruction only.
+ *@param	buffer	the string to which append the disassembled instruction
+ *@param	words	an array containing all needed words. You may put a much longer array if you will, only the number of words actually needed from the first word parsing will be read.
  *@returns	the number of words read by decoding this instruction
  */
 int disassemble_single_instruction(char *buffer, const cmd_word words[])

@@ -125,7 +125,7 @@ bool instr_jmp(SIVM *sivm, REG *dest, const cmd_word source)
 		logm(0, "Jumping too far!");
 		return false;
 	}
-	sivm->pc = source.brut;
+	sivm->pc = source.brut - 1;
     return true;
 }
 
@@ -144,9 +144,9 @@ bool instr_jeq(SIVM *sivm, REG *dest, const cmd_word source)
  */
 bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
 {
-	int newSp = sivm->sp + SP_INCR;
-	checkMemoryAccess(sivm->sp);
-	checkMemoryAccess(newSp);
+	REG newSp = sivm->sp + SP_INCR;
+	checkMemoryAccess(&sivm->sp);
+	checkMemoryAccess(&newSp);
 	sivm->mem[sivm->sp] = source;
 	sivm->sp = newSp;
 	return true;
@@ -157,8 +157,8 @@ bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
  */
 bool instr_pop(SIVM *sivm, REG *dest, const cmd_word source)
 {
-	int newSp = sivm->sp - SP_INCR;
-	checkMemoryAccess(newSp);
+	REG newSp = sivm->sp - SP_INCR;
+	checkMemoryAccess(&newSp);
 	*dest = sivm->mem[newSp].brut;
 	sivm->sp = newSp;
 	return true;

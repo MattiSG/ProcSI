@@ -56,10 +56,12 @@ bool sivm_exec(SIVM *, cmd_word *);
 /**Checks whether the given index is legal for access to the memory.
  *@returns	true if the access is legal.
  */
-bool checkMemoryAccess(REG index)
+bool checkMemoryAccess(REG *index)
 {
-	if (index > MEMSIZE) {
-		logm(LOG_FATAL_ERROR, "Invalid memory access: %d (memsize is %d)", index, MEMSIZE);
+	if (*index > MEMSIZE) {
+		logm(FATAL_LEVEL - 1, "Invalid memory access: %d (memsize is %d)", index, MEMSIZE);
+		if (! superRecover(index))
+			logm(LOG_FATAL_ERROR, "Invalid memory access: %d (memsize is %d)", index, MEMSIZE);
 		return false;
 	}
 	return true;
@@ -68,7 +70,7 @@ bool checkMemoryAccess(REG index)
 /**Checks whether the given index is legal for access to a register.
  *@returns	true if the access is legal.
  */
-bool checkRegisterAccess(unsigned index)
+bool checkRegisterAccess(REG index)
 {
 	if (index >= NREGS) {
 		logm(LOG_FATAL_ERROR, "Invalid register access: %d (number of registers is %d)", index, NREGS);
@@ -89,7 +91,7 @@ bool checkRegisterAccess(unsigned index)
  */
 bool sivm_step(SIVM *sivm)
 {
-	checkMemoryAccess(sivm->pc);
+	checkMemoryAccess(&sivm->pc);
     cmd_word *m = &sivm->mem[sivm->pc];
 
     /* stop the vm */
@@ -109,7 +111,7 @@ bool sivm_step(SIVM *sivm)
  */
 bool increment_PC(SIVM *sivm)
 {
-	if (checkMemoryAccess(sivm->pc)) {
+	if (checkMemoryAccess(&sivm->pc)) {
 		sivm->pc++;
 		return true;
 	}
@@ -140,11 +142,11 @@ REG* getDestinationParameter(SIVM *sivm, cmd_word *word)
 			break;
 		case DIRECT:
 			increment_PC(sivm);
-			checkMemoryAccess(sivm->mem[sivm->pc].brut);
+			checkMemoryAccess(&sivm->mem[sivm->pc].brut);
 			return &(sivm->mem[sivm->mem[sivm->pc].brut].brut);
 			break;
 		case INDIRECT:
-			checkMemoryAccess(sivm->reg[word->codage.dest]);
+			checkMemoryAccess(&sivm->reg[word->codage.dest]);
 			return &(sivm->mem[sivm->reg[word->codage.dest]].brut);
 			break;
 		default:
@@ -176,11 +178,11 @@ cmd_word getSourceParameter(SIVM *sivm, cmd_word *word)
 			break;
 		case DIRECT:
 			increment_PC(sivm);
-			checkMemoryAccess(sivm->mem[sivm->pc].brut);
+			checkMemoryAccess(&sivm->mem[sivm->pc].brut);
 			return (cmd_word) sivm->mem[sivm->mem[sivm->pc].brut].brut;
 			break;
 		case INDIRECT:
-			checkMemoryAccess(sivm->reg[word->codage.dest]);
+			checkMemoryAccess(&sivm->reg[word->codage.dest]);
 			return sivm->mem[sivm->reg[word->codage.source]];
 			break;
 		default:
@@ -231,7 +233,7 @@ bool sivm_print_register(SIVM *sivm, unsigned int reg)
 			printf((ANSI_OUTPUT ? "\e[36mSP\e\[0m = %d\n" : "SP = %d\n"), sivm->sp);
 			break;
 		default:
-			if (reg > 0 && reg <= NREGS)
+			if (reg < NREGS)
 				printf((ANSI_OUTPUT ? "\e[36mR%d\e\[0m = %d\n" : "R%d = %d\n"), reg, sivm->reg[reg - 1]);
 			else
 				return false;
@@ -258,7 +260,7 @@ void sivm_status(SIVM *sivm)
 	sivm_print_register(sivm, PC);
 	sivm_print_register(sivm, SR);
 	sivm_print_register(sivm, SP);
-    for (unsigned int i = 1; i <= NREGS; ++i)
+    for (unsigned int i = 0; i < NREGS; ++i)
       	sivm_print_register(sivm, i);
 }
 
@@ -282,7 +284,7 @@ char* sivm_get_instruction_string(SIVM *sivm)
 	}
 	cmd_word words[wordCount];
 	for (int i = 0; i <= wordCount; i++) {
-		checkMemoryAccess(sivm->pc + i);
+		checkMemoryAccess(&sivm->pc + i);
 		words[i] = sivm->mem[sivm->pc + i];
 	}
 	char *result = malloc(MAX_INSTR_PRINT_SIZE * sizeof(char));

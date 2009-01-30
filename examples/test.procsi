@@ -1,8 +1,8 @@
 
 ; lol
+add R4, #1329
 push #2
 pop R0
-add R3, #1329
 add R4, #8
 add R3, R4
 

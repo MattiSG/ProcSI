@@ -94,8 +94,8 @@ void sivm_status(SIVM *sivm);
 bool sivm_print_register(SIVM *sivm, unsigned int reg);
 bool sivm_print_memory(SIVM *sivm, unsigned int mem);
 
-bool checkMemoryAccess(REG index);
-bool checkRegisterAccess(unsigned index);
+bool checkMemoryAccess(REG *index);
+bool checkRegisterAccess(REG index);
 
 char* sivm_get_instruction_string(SIVM *sivm);
 

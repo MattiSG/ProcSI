@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "sivm.h"
+
 /**@name	Display and logging settings
  *Defines the level of verbosity of the program and level of output formatting.
  *0 is the less verbose mode (displays fatal errors only).
@@ -45,4 +47,9 @@ bool readLine(char *str, size_t length);
  */
 void logm(char level, char *format, ...);
 
+/**Try to make a last-moment recovery from an invalid value.
+ *@param	val	pointer to the value to possibly modify
+ *@returns	true if the user wanted to modify the value, false if not
+ */
+bool superRecover(REG *val);
 #endif /*UTIL_H*/
