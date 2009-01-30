@@ -171,13 +171,13 @@ char* disassemble(int length, const cmd_word words[])
 		mode sourceMode, destMode;
 		getModes(&currentWord, &destMode, &sourceMode);
 		
-		if (instruction.nargs > 0)
+		if (instruction.source || instruction.destination)
 		{
 			switch (currentWord.codage.mode) {
 				//whole command is 3 words long
 				case DIRIMM:
 				case INDIMM:
-					if (instruction.nargs > 1) //just for the sake of robustness, this should be forbidden in the parser anyway
+					if (instruction.source && instruction.destination) //just for the sake of robustness, this should be forbidden in the parser anyway
 					{
 						if (! disassembler_increment_reading_pointer(length, &i))
 							return strcat(buffer, "***end of program reached***");
@@ -189,7 +189,7 @@ char* disassemble(int length, const cmd_word words[])
 				//whole command is 2 words long and the second word (first being the instruction one) is the source parameter
 				case REGIMM:
 				case REGDIR:
-					if (instruction.nargs > 1)
+					if (instruction.source && instruction.destination)
 						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
 					
 					if (! disassembler_increment_reading_pointer(length, &i))
@@ -205,7 +205,7 @@ char* disassemble(int length, const cmd_word words[])
 					if (! disassembler_increment_reading_pointer(length, &i))
 						return strcat(buffer, "***end of program reached***");
 					
-					if (instruction.nargs > 1)
+					if (instruction.source && instruction.destination)
 						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
 					
 					appendParameter(buffer, currentWord, sourceMode, CMD_WORD_SOURCE_INDEX);
@@ -214,7 +214,7 @@ char* disassemble(int length, const cmd_word words[])
 				//whole command is 1 word long
 				case REGREG:
 				case REGIND:
-					if (instruction.nargs > 1)
+					if (instruction.source && instruction.destination)
 						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
 					
 					appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);

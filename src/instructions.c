@@ -216,28 +216,28 @@ bool instr_halt(SIVM *sivm, REG *dest, const cmd_word source)
  *@see	getInstruction
  */
 Instr instructions[] = {
-	[LOAD]	= {instr_load,	2,	FM_REGDIR | FM_REGIMM | FM_REGIND,				"LOAD"},
-	[STORE]	= {instr_store,	2,	FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"STORE"},
-	[MOV]	= {instr_mov,	2,	FM_REGREG | FM_REGIMM,							"MOV"},
+	[LOAD]	= {instr_load,	true,	true,	FM_REGDIR | FM_REGIMM | FM_REGIND,				"LOAD"},
+	[STORE]	= {instr_store,	true,	true,	FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"STORE"},
+	[MOV]	= {instr_mov,	true,	true,	FM_REGREG | FM_REGIMM,							"MOV"},
 			
-	[ADD]	= {instr_add,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"ADD"},
-	[SUB]	= {instr_sub,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SUB"},
-	[AND]	= {instr_and,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"AND"},
-	[OR]	= {instr_and,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"OR"},
-	[SHL]	= {instr_shl,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"DEC"},
-	[SHR]	= {instr_shr,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"INC"},
-//	[CMP]	= {instr_cmp,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND | DIRIMM | DIRREG | INDIMM | INDREG,	"CMP"}, //we had no more room for extra instructions
+	[ADD]	= {instr_add,	true,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"ADD"},
+	[SUB]	= {instr_sub,	true,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SUB"},
+	[AND]	= {instr_and,	true,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"AND"},
+	[OR]	= {instr_and,	true,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"OR"},
+	[SHL]	= {instr_shl,	true,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SHL"},
+	[SHR]	= {instr_shr,	true,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SHR"},
+//	[CMP]	= {instr_cmp,	true,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND | DIRIMM | DIRREG | INDIMM | INDREG,	"CMP"}, //we had no more room for extra instructions
 			
-	[JMP]	= {instr_jmp,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JMP"},
-	[JEQ]	= {instr_jeq,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
+	[JMP]	= {instr_jmp,	false,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JMP"},
+	[JEQ]	= {instr_jeq,	false,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
 			
-	[PUSH]	= {instr_push,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"PUSH"},
-	[POP]	= {instr_pop,	1,	FM_REGREG,	"POP"},
+	[PUSH]	= {instr_push,	false,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"PUSH"},
+	[POP]	= {instr_pop,	true,	false,	FM_REGREG,	"POP"},
 			
-	[CALL]	= {instr_call,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"CALL"},
-	[RET]	= {instr_ret,	0,	0x0,	"RET"},
+	[CALL]	= {instr_call,	false,	true,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"CALL"},
+	[RET]	= {instr_ret,	false,	false,	0x0,	"RET"},
 
-	[HALT]	= {instr_halt,	0,	0x0,	"HALT"},
+	[HALT]	= {instr_halt,	false,	false,	0x0,	"HALT"},
 };
 
 //@}
