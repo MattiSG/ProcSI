@@ -7,17 +7,17 @@
  */
 typedef struct {
     /* per char parsing */
-    char *cur;
-    unsigned int row;
-    unsigned int col;
+    char *cur;          /*!< pointer to currently being parsed character */
+    unsigned int row;   /*!< currently being parsed row */
+    unsigned int col;   /*!< currently being parser column */
 
-    REG pc;
-    cmd_word* mem;
-    int* pcline;
-    REG memsize;
-    FILE* fp;
+    REG pc;             /*!< currently location in memory */
+    cmd_word* mem;      /*!< the whole memory */
+    int* pcline;        /*!< pcline[pc] => .procsi line (size of memsize) */
+    REG memsize;        /*!< size of the memory */
+    FILE* fp;           /*!< pointer to .procsi FILE */
     
-    LblListElm *labels;
+    LblListElm *labels; /*!< labels, and their corresponding address */
 } Parser;
 
 /**Pseudo-modes list

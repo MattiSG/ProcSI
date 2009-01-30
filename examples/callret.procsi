@@ -1,7 +1,7 @@
-call #mafonction
-call #mafonction
-call #mafonction
-call #mafonction
+call mafonction
+call mafonction
+call mafonction
+call mafonction
 halt
 
 mafonction:
