@@ -68,7 +68,7 @@ void debugger_new(Debugger *debug)
     readLine(filename, LINE_MAX);
     printf("Fichier : \"%s\"\n", filename);
     */
-    strcpy(filename, "test.procsi");
+    strcpy(filename, "examples/test.procsi");
 
 
 	cmd_word *prg;
@@ -77,6 +77,8 @@ void debugger_new(Debugger *debug)
     {
         quit("Can't load / assemble file");
     }
+    //printf("%d %d %d %d\n", prg[0].codage.codeop, prg[0].codage.mode, prg[0].codage.source, prg[0].codage.dest);
+    //printf("taille => %d\n", memsize);
  
 
 /*	
@@ -128,10 +130,12 @@ void debugger_start(Debugger *debug)
                 execute = true;
                 break;
             case STATUS:
+                execute = false;
                 sivm_status(&debug->sivm);
                 break;
             case QUIT:
                 finish = true;
+                execute = false;
                 break;
             case RESTART:
                 debugger_new(debug);
@@ -141,6 +145,7 @@ void debugger_start(Debugger *debug)
                 break;
             case DISPLAY:
                 {
+                    execute = false;
                     char *type = strtok(0, " ");
                     if (!type || strlen(type) != 3)
                     {
@@ -165,6 +170,7 @@ void debugger_start(Debugger *debug)
                 break;
             case BREAKPOINT:
                 {
+                    execute = false;
                     char *type = strtok(0, " ");
                     if (!type)
                     {
@@ -204,6 +210,7 @@ void debugger_start(Debugger *debug)
             case UNKNOWN:
                 printf("Unknown command\n");
             case HELP:
+                execute = false;
                 displayHelp();
                 break;
         }
