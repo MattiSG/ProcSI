@@ -10,6 +10,6 @@
 bool getModes(cmd_word *w, mode *destMode, mode *sourceMode);
 
 char* disassemble(int length, const cmd_word words[]);
-char* disassemble_no_formatting(int length, const cmd_word words[]);
+int disassemble_single_instruction(char *string, const cmd_word words[]);
 
 #endif

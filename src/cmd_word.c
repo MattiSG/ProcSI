@@ -156,73 +156,86 @@ char* disassemble(int length, const cmd_word words[])
 		
 		strcat(buffer, lineBuffer);
 		line++;
-		
-		cmd_word currentWord = words[i];
-		Instr instruction = getInstruction(currentWord);
-		
-		strcat(buffer, instruction.name);
-		
-		strcat(buffer, "\t");
-		
-		mode sourceMode, destMode;
-		getModes(&currentWord, &destMode, &sourceMode);
-		
-		if (instruction.source || instruction.destination)
-		{
-			switch (currentWord.codage.mode) {
-				//whole command is 3 words long
-				case DIRIMM:
-				case INDIMM:
-					if (instruction.source && instruction.destination) //just for the sake of robustness, this should be forbidden in the parser anyway
-					{
-						if (! disassembler_increment_reading_pointer(length, &i))
-							return strcat(buffer, "***end of program reached***");
-					} else { //normally impossible to encounter
-						logm(LOG_WARNING, "Disassembly encountered an incorrect adressing mode\n\t(adressing mode requiring 3 words for a command allowing 1 or less parameter)");
-						return strcat(buffer, "***incorrect number of parameters***");
-					}
-					
-				//whole command is 2 words long and the second word (first being the instruction one) is the source parameter
-				case REGIMM:
-				case REGDIR:
-					if (instruction.destination)
-						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
-					
-					if (! disassembler_increment_reading_pointer(length, &i))
-						return strcat(buffer, "***end of program reached***");
-					if (instruction.source)
-						appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
-					
-					break;
-					
-				//whole command is 2 words long and the second word (first being the instruction one) is the destination parameter
-				case DIRREG:
-				case INDREG:
-					if (! disassembler_increment_reading_pointer(length, &i))
-						return strcat(buffer, "***end of program reached***");
-					
-					if (instruction.destination)
-						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
-					if (instruction.source)
-						appendParameter(buffer, currentWord, sourceMode, CMD_WORD_SOURCE_INDEX);
-					break;
-					
-				//whole command is 1 word long
-				case REGREG:
-				case REGIND:
-					if (instruction.destination)
-						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
-					if (instruction.source)
-						appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
-					break;
-									
-				default:
-					logm(LOG_FATAL_ERROR, "Invalid adressing mode");
-					return false;
-			}
+
+		int incr = disassemble_single_instruction(buffer, &words[i]);
+		while (--incr) {
+			if (! disassembler_increment_reading_pointer(length, &i))
+				return strcat(buffer, "***end of program reached***");
 		}
+
 		strcat(buffer, "\n");
 	}
 	return buffer;
+}
+
+/**
+ *@returns	the number of words read by decoding this instruction
+ */
+int disassemble_single_instruction(char *buffer, const cmd_word words[])
+{
+	int read = 0;
+	cmd_word currentWord = words[read];
+	Instr instruction = getInstruction(currentWord);
+	
+	strcat(buffer, instruction.name);
+	
+	strcat(buffer, "\t");
+	
+	mode sourceMode, destMode;
+	getModes(&currentWord, &destMode, &sourceMode);
+	
+	if (instruction.source || instruction.destination)
+	{
+		switch (currentWord.codage.mode) {
+				//whole command is 3 words long
+			case DIRIMM:
+			case INDIMM:
+				if (instruction.source && instruction.destination) //just for the sake of robustness, this should be forbidden in the parser anyway
+				{
+					read++;
+				} else { //normally impossible to encounter
+					logm(LOG_WARNING, "Disassembly encountered an incorrect adressing mode\n\t(adressing mode requiring 3 words for a command allowing 1 or less parameter)");
+					return -1;
+				}
+				
+				//whole command is 2 words long and the second word (first being the instruction one) is the source parameter
+			case REGIMM:
+			case REGDIR:
+				if (instruction.destination)
+					appendParameter(buffer, words[read], destMode, CMD_WORD_DEST_INDEX);
+				
+
+				read++;
+				if (instruction.source)
+					appendParameter(buffer, words[read], sourceMode, CMD_WORD_SOURCE_INDEX);
+				
+				break;
+				
+				//whole command is 2 words long and the second word (first being the instruction one) is the destination parameter
+			case DIRREG:
+			case INDREG:
+				read++;
+				
+				if (instruction.destination)
+					appendParameter(buffer, words[read], destMode, CMD_WORD_DEST_INDEX);
+				if (instruction.source)
+					appendParameter(buffer, currentWord, sourceMode, CMD_WORD_SOURCE_INDEX);
+				break;
+				
+				//whole command is 1 word long
+			case REGREG:
+			case REGIND:
+				if (instruction.destination)
+					appendParameter(buffer, words[read], destMode, CMD_WORD_DEST_INDEX);
+				if (instruction.source)
+					appendParameter(buffer, words[read], sourceMode, CMD_WORD_SOURCE_INDEX);
+				break;
+				
+			default:
+				logm(LOG_FATAL_ERROR, "Invalid adressing mode");
+				return -1;
+		}
+	}
+	return read + 1;
 }
 //@}

@@ -1,5 +1,6 @@
-#include "sivm.h"
+#include <stdlib.h>
 
+#include "sivm.h"
 #include "instructions.h"
 #include "cmd_word.h"
 
@@ -280,10 +281,12 @@ char* sivm_get_instruction_string(SIVM *sivm)
 		}
 	}
 	cmd_word words[wordCount];
-	for (int i = 0; i < wordCount; i++) {
+	for (int i = 0; i <= wordCount; i++) {
 		checkMemoryAccess(sivm->pc + i);
 		words[i] = sivm->mem[sivm->pc + i];
 	}
-	return disassemble(wordCount, words);
+	char *result = malloc(MAX_INSTR_PRINT_SIZE * sizeof(char));
+	disassemble_single_instruction(result, words);
+	return result;
 }
 //@}
