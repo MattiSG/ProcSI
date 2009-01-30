@@ -53,6 +53,65 @@ bool instr_sub(SIVM *sivm, REG *dest, const cmd_word source)
     return true;
 }
 
+/**Emulates the AND command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_and(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	*dest &= source.brut;
+	sivm->sr = *dest;
+    return true;
+}
+
+/**Emulates the OR command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_or(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	*dest |= source.brut;
+	sivm->sr = *dest;
+    return true;
+}
+
+/**Emulates the DEC command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_dec(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	*dest--;
+	sivm->sr = *dest;
+    return true;
+}
+
+/**Emulates the SHL command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_shl(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	*dest <<= source.brut;
+	sivm->sr = *dest;
+    return true;
+}
+
+/**Emulates the SHR command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_shr(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	*dest >>= source.brut;
+	sivm->sr = *dest;
+    return true;
+}
+
+/**Emulates the CMP command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_cmp(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	sivm->sr = (*dest - source.brut);
+    return true;
+}
+
 /**Emulates the JMP command in the given SIVM.
  *This instruction takes only one parameter above the targeted SIVM, source, but keeps the dest argument for type compatibility.
  *<strong>WARNING</strong> the argument to use is <strong>source</strong> and not dest.
@@ -168,6 +227,11 @@ Instr instructions[] = {
 			
 	[ADD]	= {instr_add,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"ADD"},
 	[SUB]	= {instr_sub,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SUB"},
+	[AND]	= {instr_and,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"AND"},
+	[OR]	= {instr_and,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"OR"},
+	[SHL]	= {instr_shl,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"DEC"},
+	[SHR]	= {instr_shr,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"INC"},
+//	[CMP]	= {instr_cmp,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND | DIRIMM | DIRREG | INDIMM | INDREG,	"CMP"}, //we had no more room for extra instructions
 			
 	[JMP]	= {instr_jmp,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JMP"},
 	[JEQ]	= {instr_jeq,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
