@@ -77,7 +77,7 @@ int find_command(char *cmd)
 void display_help()
 {
     for (unsigned int i = 0; i < NB_COMMANDS; ++i)
-        printf("  %s : %s\n", commands[i].name, commands[i].help);
+        printf("  %s: %s\n", commands[i].name, commands[i].help);
 }
 
 void debugger_new(Debugger *debug)
@@ -143,7 +143,6 @@ void debugger_start(Debugger *debug)
         char line[LINE_MAX];
         readLine(line, LINE_MAX);
         char *cmd = strtok(line, " ");
-        //printf("token => %s\n", line);
 
         switch (find_command(cmd))
         {
@@ -187,9 +186,9 @@ void debugger_start(Debugger *debug)
                     unsigned int nb = atoi(num);
 
                     if (!strcmp(type, "reg"))
-                        printf("=> register %d: %d\n", nb, nb);
+                        printf("=> register %d: %d\n", nb, *(&debug->sivm.reg[nb]));
                     else if (!strcmp(type, "mem"))
-                        printf("=> register %d: %d\n", nb, nb);
+                        printf("=> memory %d: %d\n", nb, *(&debug->sivm.mem[nb].brut));
                     else
                         printf("Usage: display (reg|mem) number\n");
                 }
