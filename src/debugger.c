@@ -31,6 +31,7 @@ typedef enum
     RUN = 0,
     STEP,
 	PROGRAM,
+	INFO,
     RESTART,
     DISPLAY,
     BREAKPOINT,
@@ -39,7 +40,7 @@ typedef enum
     UNKNOWN
 } type_command;
 
-#define NB_COMMANDS 8 /*!< number of commands */
+#define NB_COMMANDS 9 /*!< number of commands */
 
 /**
  * \brief Array of available commands
@@ -49,8 +50,10 @@ Command commands[NB_COMMANDS] = {
     [RUN]        = { "run", "run the program all at once" },
     [STEP]       = { "step", "execute one instruction in the program" },
     [PROGRAM]    = { "program", "display the disassembled program currently loaded in the VM" },
+    [INFO]       = { "info", "display specifications of the current VM" },
     [RESTART]    = { "reload", "reload the program (updates from the file)" },
-    [DISPLAY]    = { "display", "display a register or memory unit value, or the whole VM status\n\tUsage: display [(reg|mem) number]" },
+    [DISPLAY]    = { "display", "display a register or memory unit value, or the whole VM status\n\tUsage: display [(reg number|PC|SP|SR) | (mem number)]" },
+    [HELP]       = { "help", "display help" },
     [BREAKPOINT] = { "breakpoint", "add or remove a breakpoint" },
     [HELP]       = { "help", "display help" },
     [QUIT]       = { "quit", "close the debugger" }
@@ -65,7 +68,7 @@ Command commands[NB_COMMANDS] = {
 int find_command(char *cmd)
 {
     for (unsigned int i = 0; i < NB_COMMANDS; ++i)
-        if (!strncmp(cmd, commands[i].name, strlen(commands[i].name)) && strlen(cmd) == strlen(commands[i].name))
+        if (! strncmp(cmd, commands[i].name, strlen(commands[i].name)) && strlen(cmd) == strlen(commands[i].name))
             return i;
 
     return UNKNOWN;
@@ -97,7 +100,7 @@ void debugger_new(Debugger *debug)
 	cmd_word *prg;
     int memsize;
     if (! sivm_parse_file(&memsize, &prg, filename))
-        logm(0, "Unable to load / assemble file");
+        logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
     else
         logm(LOG_STEP, "Parsing successful");
 	
@@ -143,7 +146,7 @@ void debugger_start(Debugger *debug)
         //char line[LINE_MAX];
         //readLine(line, LINE_MAX);
 
-        char *line = readline ("$ ");
+        char *line = readline ("> ");
         char *cmd = strtok(line, " ");
 
         switch (find_command(cmd))
@@ -168,7 +171,20 @@ void debugger_start(Debugger *debug)
                 break;
 			case PROGRAM:
 				printf(disassemble(debug->programSize, debug->program));
+				printf("(Total size: %d words)\n", (int) debug->programSize);
 				break;
+			case INFO:
+				if (ANSI_OUTPUT) {
+					printf("\e[36mMemory size:\e[0m\n\t%d\n", MEMSIZE);
+					printf("\e[36mNumber of registers:\e[0m\n\t%d\n", NREGS);
+					printf("\e[36mReserved registers (not updated on CALL and RET):\e[0m\n\tR%d-R%d\n", PARAM_REGS_START, PARAM_REGS_END);
+					printf("\e[36mStack is going through\e[0m %s adresses\n", (SP_INCR > 0 ? "ascending" : "descending"));
+				} else {
+					printf("Memory size:\n\t%d\n", MEMSIZE);
+					printf("Number of registers:\n\t%d\n", NREGS);
+					printf("Reserved registers (not updated on CALL and RET):\n\tR%d-R%d\n", PARAM_REGS_START, PARAM_REGS_END);
+					printf("Stack is going through %s adresses\n", (SP_INCR > 0 ? "ascending" : "descending"));
+				}
             case DISPLAY:
                 {
                     execute = false;
@@ -179,19 +195,33 @@ void debugger_start(Debugger *debug)
                         break;
                     }
                     char *num = strtok(0, " ");
-                    if (!num || !isdigit(num[0]))
+                    if (!num)
                     {
-                        printf("Usage: %s\n", commands[DISPLAY].help);
+						printf("Usage: %s\n", commands[DISPLAY].help);
                         break;
                     }
-                    unsigned int nb = atoi(num);
-
-                    if (!strcmp(type, "reg"))
-                        printf("=> register %d: %d\n", nb, *(&debug->sivm.reg[nb]));
-                    else if (!strcmp(type, "mem"))
-                        printf("=> memory %d: %d\n", nb, *(&debug->sivm.mem[nb].brut));
+					
+					if (! strcmp(type, "mem"))
+					{
+						if (! sivm_print_memory(&debug->sivm, atoi(num)))
+							logm(LOG_WARNING, "Unreachable value. Size of memory for this VM is %d.", MEMSIZE);
+					}
+					else if (! strcmp(type, "reg"))
+					{
+						int reg;
+						if ((! strcmp(num, "PC")) || (! strcmp(num, "pc")))
+							reg = PC;
+						else if ((! strcmp(num, "SR")) || (! strcmp(num, "sr")))
+							reg = SR;
+						else if ((! strcmp(num, "SP")) || (! strcmp(num, "sp")))
+							reg = SP;
+						else reg = atoi(num);
+						
+						if (! sivm_print_register(&debug->sivm, reg))
+							logm(LOG_WARNING, "Unreachable value. Registers are available from 1 to %d, plus \"PC\", \"SP\" and \"SR\".", NREGS);
+					}
                     else
-                        printf("Usage: %s\n", commands[DISPLAY].help);
+						printf("Usage: %s\n", commands[DISPLAY].help);
                 }
                 break;
             case BREAKPOINT:
@@ -251,9 +281,7 @@ void debugger_start(Debugger *debug)
         {
             if (end_found)
             {
-				if (ANSI_OUTPUT) printf("\e[36m");
-                printf("End of program reached\n");
-				if (ANSI_OUTPUT) printf("\e[0m");
+                logm(LOG_STEP, "End of program reached\n");
                 break;
             }
 

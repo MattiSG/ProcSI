@@ -17,17 +17,17 @@ void sivm_new(SIVM *sivm)
     sivm->sr = SR_START;
 	
 	if (SP_START + SP_INCR > MEMSIZE || SP_START + SP_INCR <= 0)
-		logm(1, "Stack init and incrementation are not in the same way, VM will crash at first PUSH.");
+		logm(LOG_ERROR, "Stack init and incrementation are not in the same way, VM will crash at first PUSH.");
 	
 	if (PARAM_REGS_END > NREGS || PARAM_REGS_START > NREGS || PARAM_REGS_END < PARAM_REGS_START)
-		logm(1, "Reserved argument registers have illegal values, VM will crash at first CALL or RET.");
+		logm(LOG_ERROR, "Reserved argument registers have illegal values, VM will crash at first CALL or RET.");
 	
     for (unsigned int i = 0; i < NREGS; i++)
         sivm->reg[i] = 0;
     for (unsigned int i = 0; i < MEMSIZE; i++)
         sivm->mem[i].brut = 0;
 	
-	logm(2, "VM successfully initialized.");
+	logm(LOG_STEP, "VM successfully initialized.");
 }
 
 /**Loads the given program in the given SIVM.
@@ -58,7 +58,7 @@ bool sivm_exec(SIVM *, cmd_word *);
 bool checkMemoryAccess(REG index)
 {
 	if (index > MEMSIZE) {
-		logm(0, "Invalid memory access: ", index);
+		logm(LOG_FATAL_ERROR, "Invalid memory access: %d (memsize is %d)", index, MEMSIZE);
 		return false;
 	}
 	return true;
@@ -70,7 +70,7 @@ bool checkMemoryAccess(REG index)
 bool checkRegisterAccess(unsigned index)
 {
 	if (index >= NREGS) {
-		logm(0, "Invalid register access: ", index);
+		logm(LOG_FATAL_ERROR, "Invalid register access: %d (number of registers is %d)", index, NREGS);
 		return false;
 	}
 	return true;
@@ -93,7 +93,7 @@ bool sivm_step(SIVM *sivm)
 
     /* stop the vm */
     if (m->codage.codeop == HALT) {
-		logm(3, "HALT instruction encountered, stopping VM.");
+		logm(LOG_INFO, "HALT instruction encountered, stopping VM.");
         return false;
 	}
 	
@@ -112,7 +112,7 @@ bool increment_PC(SIVM *sivm)
 		sivm->pc++;
 		return true;
 	}
-	logm(0, "PC too high !");
+	logm(LOG_FATAL_ERROR, "PC too high (%d, memsize being %d)", sivm->pc + 1, MEMSIZE);
 	return false;
 }
 
@@ -134,7 +134,7 @@ REG* getDestinationParameter(SIVM *sivm, cmd_word *word)
 			return &sivm->reg[word->codage.dest];
 			break;
 		case IMMEDIATE:
-			logm(0, "Invalid adressing mode: destination parameter can't be an immediate value!");
+			logm(LOG_FATAL_ERROR, "Invalid adressing mode: destination parameter can't be an immediate value! (command: %d)", *word);
 			return NULL;
 			break;
 		case DIRECT:
@@ -147,7 +147,7 @@ REG* getDestinationParameter(SIVM *sivm, cmd_word *word)
 			return &(sivm->mem[sivm->reg[word->codage.dest]].brut);
 			break;
 		default:
-			logm(0, "Invalid destination adressing mode");
+			logm(LOG_FATAL_ERROR, "Invalid destination adressing mode (command: %d)", *word);
 			return NULL;
 	}
 }
@@ -183,7 +183,7 @@ cmd_word getSourceParameter(SIVM *sivm, cmd_word *word)
 			return sivm->mem[sivm->reg[word->codage.source]];
 			break;
 		default:
-			logm(0, "Invalid source adressing mode");
+			logm(LOG_FATAL_ERROR, "Invalid source adressing mode (command: %d)", *word);
 			return (cmd_word) {.codage = { HALT }}; //Don't test for this value to detect errors, because it might also be a valid integer value
 	}
 }
@@ -202,10 +202,10 @@ bool sivm_exec(SIVM *sivm, cmd_word *word)
 	REG *dest = getDestinationParameter(sivm, word);
 	
 	if (instr.function(sivm, dest, source)) {
-		logm(5, "Instruction successful");
+		logm(LOG_DEBUG, "Instruction successful");
 		return true;
 	} else {
-		logm(1, "Instruction unsuccessful");
+		logm(LOG_ERROR, "Instruction unsuccessful (command: %d)", *word);
 		return false;
 	}
 }
@@ -221,17 +221,17 @@ bool sivm_print_register(SIVM *sivm, unsigned int reg)
 {
 	switch (reg) {
 		case PC:
-			printf("PC = %d\n", sivm->pc);
+			printf((ANSI_OUTPUT ? "\e[36mPC\e\[0m = %d\n" : "PC = %d\n"), sivm->pc);
 			break;
 		case SR:
-			printf("SR = %d\n", sivm->sr);
+			printf((ANSI_OUTPUT ? "\e[36mSR\e\[0m = %d\n" : "SR = %d\n"), sivm->pc);
 			break;
 		case SP:
-			printf("SP = %d\n", sivm->sp);
+			printf((ANSI_OUTPUT ? "\e[36mSP\e\[0m = %d\n" : "SP = %d\n"), sivm->pc);
 			break;
 		default:
 			if (reg > 0 && reg <= NREGS)
-				printf("R%d = %d\n", reg, sivm->reg[reg - 1]);
+				printf((ANSI_OUTPUT ? "\e[36mR%d\e\[0m = %d\n" : "R%d = %d\n"), reg, sivm->reg[reg - 1]);
 			else
 				return false;
 			break;
@@ -245,7 +245,7 @@ bool sivm_print_register(SIVM *sivm, unsigned int reg)
 bool sivm_print_memory(SIVM *sivm, unsigned int mem)
 {
 	if (mem >= MEMSIZE) return false;
-	printf("MEM[%d] = %d", mem, sivm->mem[mem].brut);
+	printf((ANSI_OUTPUT ? "\e[36mMEM[%d]\e\[0m = %d\n" : "MEM[%d] = %d\n"), mem, sivm->mem[mem].brut);
 	return true;
 }
 
