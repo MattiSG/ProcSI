@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "debugger.h"
 #include "breakpoint.h"
@@ -119,8 +121,6 @@ void debugger_new(Debugger *debug)
     sivm_load(&debug->sivm, memsize, prg);
 }
 
-#include <readline/readline.h>
-#include <readline/history.h>
 void debugger_start(Debugger *debug)
 {
     breakpoints_list breakpoints;
