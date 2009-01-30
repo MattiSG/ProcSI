@@ -12,12 +12,22 @@
 //@{
 /**Activate colored output or not*/
 #define ANSI_OUTPUT true
+/**Level for messages informing user about important good steps (ie. init successful).
+ *These won't be affected by LOG_LEVEL.
+ */
+#define LOG_STEP 100
+
+#define LOG_FATAL_ERROR 0
+#define LOG_ERROR 1
+#define LOG_WARNING 2
+#define LOG_INFO 3
+#define LOG_DEBUG 4
+/**Level of message from which error is considered as fatal (exits)*/
+#define FATAL_LEVEL 0
 /**Maximum level of messages to be displayed to stderr*/
 #define ERR_LOG_LEVEL 5
 /**Maximum level of messages to be displayed to stdout*/
 #define OUT_LOG_LEVEL 5
-/**Level of message from which error is considered as fatal (exits)*/
-#define FATAL_LEVEL 0
 //@}
 
 /**Read a line from the standard input

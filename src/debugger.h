@@ -12,6 +12,7 @@ typedef struct
 {
     SIVM sivm;         /*!< pointer to virtual machine */
     cmd_word *program; /*!< pointer to array of commands */
+	size_t programSize; /*!< size of the loaded program, in number of cmd_word*/
 } Debugger;
 
 /**

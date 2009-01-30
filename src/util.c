@@ -26,22 +26,31 @@ void logm(char level, char *format, ...)
 	
 	char *color;
 	switch (level) {
-		case 0:
+		case LOG_STEP:
+			color = "[32m";
+			break;
+		case LOG_FATAL_ERROR:
 			color = "[41m\e[30m";
 			break;
-		case 1:
-			color = "[43m\e[30m";
-			break;
-		case 2:
+		case LOG_ERROR:
 			color = "[31m";
 			break;
-		case 5:
+		case LOG_WARNING:
+			color = "[33m";
+			break;
+		case LOG_INFO:
+			color = "[0m";
+			break;
+		case LOG_DEBUG:
 			color = "[34m";
 			break;
 		default:
 			break;
 	}
-
+	
+	if (level == LOG_STEP)
+		level = OUT_LOG_LEVEL; //This way, we make sure important steps are always displayed
+	
 	if (level <= OUT_LOG_LEVEL)
     {
 		if (ANSI_OUTPUT) {

@@ -30,28 +30,30 @@ typedef enum
 {
     RUN = 0,
     STEP,
-    QUIT,
+	PROGRAM,
     RESTART,
-    HELP,
     DISPLAY,
     BREAKPOINT,
+    HELP,
+    QUIT,
     UNKNOWN
 } type_command;
 
-#define NB_COMMANDS 7 /*!< number of commands */
+#define NB_COMMANDS 8 /*!< number of commands */
 
 /**
  * \brief Array of available commands
  * \see   Command
  */
 Command commands[NB_COMMANDS] = {
-    [RUN]        = { "run", "run program without step by step" },
-    [STEP]       = { "step", "make a step in the program" },
-    [QUIT]       = { "quit", "close the debugger" },
-    [RESTART]    = { "reload", "reload the program" },
+    [RUN]        = { "run", "run the program all at once" },
+    [STEP]       = { "step", "execute one instruction in the program" },
+    [PROGRAM]    = { "program", "display the disassembled program currently loaded in the VM" },
+    [RESTART]    = { "reload", "reload the program (updates from the file)" },
+    [DISPLAY]    = { "display", "display a register or memory unit value, or the whole VM status\n\tUsage: display [(reg|mem) number]" },
+    [BREAKPOINT] = { "breakpoint", "add or remove a breakpoint" },
     [HELP]       = { "help", "display help" },
-    [DISPLAY]    = { "display", "display [(reg|mem) number]" },
-    [BREAKPOINT] = { "breakpoint", "put or delete a breakpoint" }
+    [QUIT]       = { "quit", "close the debugger" }
 };
 
 /**
@@ -77,7 +79,7 @@ int find_command(char *cmd)
 void display_help()
 {
     for (unsigned int i = 0; i < NB_COMMANDS; ++i)
-        printf("  %s: %s\n", commands[i].name, commands[i].help);
+        printf((ANSI_OUTPUT ? "  \e[33m%s\e[0m:\t%s\n" : "  %s:\t%s\n"), commands[i].name, commands[i].help);
 }
 
 void debugger_new(Debugger *debug)
@@ -94,14 +96,17 @@ void debugger_new(Debugger *debug)
 
 	cmd_word *prg;
     int memsize;
-    if(!sivm_parse_file(&memsize, &prg, filename))
-        logm(0, "Can't load / assemble file");
+    if (! sivm_parse_file(&memsize, &prg, filename))
+        logm(0, "Unable to load / assemble file");
     else
-        logm(5, "W00t => pargin ok");
-
+        logm(LOG_STEP, "Parsing successful");
+	
     sivm_new(&debug->sivm);
+	debug->program = prg;
+	debug->programSize = memsize;
 
-/*	
+/*	//A program loaded in memory has this form:
+ 
     cmd_word prg[] = {
         { .codage = { MOV, REGIMM, 3, 0 }},
         { .brut   =   1					  },
@@ -116,8 +121,9 @@ void debugger_new(Debugger *debug)
     };
     int memsize = sizeof(prg) / sizeof(cmd_word);
 */	
-
-    printf("Loaded program:\n%s", disassemble(memsize, prg));
+	if (ANSI_OUTPUT) printf("\e[32m");
+    printf("Program loaded\n");
+	if (ANSI_OUTPUT) printf("\e[0m");
     sivm_load(&debug->sivm, memsize, prg);
 }
 
@@ -160,6 +166,9 @@ void debugger_start(Debugger *debug)
                 step_by_step = true;
                 execute = false;
                 break;
+			case PROGRAM:
+				printf(disassemble(debug->programSize, debug->program));
+				break;
             case DISPLAY:
                 {
                     execute = false;
@@ -242,7 +251,9 @@ void debugger_start(Debugger *debug)
         {
             if (end_found)
             {
+				if (ANSI_OUTPUT) printf("\e[36m");
                 printf("End of program reached\n");
+				if (ANSI_OUTPUT) printf("\e[0m");
                 break;
             }
 
