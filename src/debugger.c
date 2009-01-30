@@ -87,31 +87,27 @@ void display_help()
 
 void debugger_new(Debugger *debug, char *filename, bool isSource)
 {
-    if (filename)
-    {
-        debug->filename = (char*)malloc(strlen(filename)+1);
-        strcpy(debug->filename, filename);
-    }
+    debug->filename = (char*)malloc(strlen(filename)+1);
+    strcpy(debug->filename, filename);
 
-    ParserResult presult;
-    presult.labels_head = NULL;
-    presult.pcline = NULL;
-    if (isSource)
+    debug->is_source = isSource;
+
+    debug->presult.labels_head = NULL;
+    debug->presult.pcline = NULL;
+    if (debug->is_source)
     {
-        if (!sivm_parse_file(&presult, debug->filename))
+        if (!sivm_parse_file(&debug->presult, debug->filename))
             logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
         else
             logm(LOG_STEP, "Parsing successful");
     }
     else
     {
-        load_program(debug->filename, &presult.mem, &presult.memsize);
+        load_program(debug->filename, &debug->presult.mem, &debug->presult.memsize);
         logm(LOG_STEP, "Loading successful");
     }
 
     sivm_new(&debug->sivm);
-	debug->program = presult.mem;
-	debug->programSize = presult.memsize;
 
 /*	//A program loaded in memory has this form:
  
@@ -132,7 +128,7 @@ void debugger_new(Debugger *debug, char *filename, bool isSource)
 	//if (ANSI_OUTPUT) printf("\e[32m");
     printf("Program loaded\n");
 	//if (ANSI_OUTPUT) printf("\e[0m");
-    sivm_load(&debug->sivm, presult.memsize, presult.mem);
+    sivm_load(&debug->sivm, debug->presult.memsize, debug->presult.mem);
 }
 
 void debugger_start(Debugger *debug)
@@ -153,6 +149,8 @@ void debugger_start(Debugger *debug)
 
         char *line = readline ("> ");
         char *cmd = strtok(line, " ");
+        if (!strlen(line))
+            continue;
 
         switch (find_command(cmd))
         {
@@ -163,21 +161,20 @@ void debugger_start(Debugger *debug)
             case STEP:
                 step_by_step = true;
                 execute = true;
-				logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
                 break;
             case QUIT:
                 finish = true;
                 execute = false;
                 break;
             case RESTART:
-                debugger_new(debug, 0, false);
+                debugger_new(debug, debug->filename, debug->is_source);
                 end_found = false;
                 step_by_step = true;
                 execute = false;
                 break;
 			case PROGRAM:
-				printf(disassemble(debug->programSize, debug->program));
-				printf("(Total size: %d words)\n", (int) debug->programSize);
+				printf(disassemble(debug->presult.memsize, debug->presult.mem));
+				printf("(Total size: %d words)\n", (int) debug->presult.memsize);
 				break;
 			case INFO:
 				if (ANSI_OUTPUT) {
@@ -269,6 +266,8 @@ void debugger_start(Debugger *debug)
                         unsigned int nb = atoi(num);
                         if (!breakpoint_list_rm(&breakpoints, nb))
                             printf("no breakpoint\n");
+                        else
+                            printf("remove breakpoint n°%d\n", nb);
                     }
                     else
                         printf("Usage: %s\n", commands[BREAKPOINT].help);
@@ -291,9 +290,10 @@ void debugger_start(Debugger *debug)
                 break;
             }
 
+            logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
             end_found = !sivm_step(&debug->sivm);
 
-            if (step_by_step) break;
+            if (step_by_step || breakpoint_list_has(&breakpoints, debug->sivm.pc)) break;
         }
     }
     while (!finish);

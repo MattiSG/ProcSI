@@ -13,9 +13,9 @@
 typedef struct
 {
     SIVM sivm;          /*!< pointer to virtual machine */
-    cmd_word *program;  /*!< pointer to array of commands */
     char *filename;     /*!< filename of the binary program */
-	size_t programSize; /*!< size of the loaded program, in number of cmd_word*/
+    ParserResult presult;
+    bool is_source;
 } Debugger;
 
 /**
