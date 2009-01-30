@@ -42,7 +42,7 @@ typedef enum
 	DIRIMM = 0x5, // 0b0100
 	DIRREG = 0x1, // 0b0001
 	INDIMM = 0x6, // 0b0110
-	INDREG = 0x2, // 0b0020
+	INDREG = 0x2, // 0b0010
 	REGISTER,
 	IMMEDIATE,
 	DIRECT,
@@ -68,13 +68,13 @@ typedef enum
 
 
 typedef struct {
-    bool (*function)(SIVM *sivm, REG *dest, const mot source);
+    bool (*function)(SIVM *sivm, REG *dest, const cmd_word source);
     f_mode modes;
 	char* name;
 } Instr;
 
-bool checkModes(const mot m);
+bool checkModes(const cmd_word m);
 
-Instr getInstruction(const mot m);
+Instr getInstruction(const cmd_word m);
 
 #endif

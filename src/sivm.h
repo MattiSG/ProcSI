@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 
-
 typedef uint16_t REG;
+
 
 /**@name	SIVM parameters*/
 //@{
@@ -29,25 +29,25 @@ typedef uint16_t REG;
 #define SP_INCR -1
 //@}
 
+/*This definition isn't in cmd_word.h because of unresolvable recursive includes.*/
 typedef union
 {
-    REG brut;
-    struct
-    {
-        unsigned codeop : 6;
-        unsigned mode   : 4;
-        unsigned source : 3;
-        unsigned dest   : 3;
-    } codage;
-} mot;
-
+	REG brut;
+	struct
+	{
+		unsigned codeop : 6;
+		unsigned mode   : 4;
+		unsigned source : 3;
+		unsigned dest   : 3;
+	} codage;
+} cmd_word;
 
 typedef struct {
     REG pc;
     REG sp;
     REG sr;
     REG reg[NREGS];
-    mot mem[MEMSIZE];
+	cmd_word mem[MEMSIZE];
 } SIVM;
 
 /**
@@ -55,10 +55,10 @@ typedef struct {
  * \author Me
  */
 void sivm_new(SIVM *sivm);
-bool sivm_load(SIVM *sivm, int memsize, mot mem[memsize]);
+bool sivm_load(SIVM *sivm, int memsize, cmd_word mem[memsize]);
 bool sivm_step(SIVM *sivm);
 void sivm_status(SIVM *sivm);
 
-void sivm_get_instruction_string(SIVM *sivm, char *buffer);
+char* sivm_get_instruction_string(SIVM *sivm);
 
 #endif /*SIVM_H*/

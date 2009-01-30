@@ -70,26 +70,30 @@ void debugger_new(Debugger *debug)
     */
     strcpy(filename, "test.procsi");
 
-    mot *prg;
+
+	cmd_word *prg;
     int memsize;
     if(!sivm_parse_file(&memsize, &prg, filename))
     {
         quit("Can't load / assemble file");
     }
+ 
 
-	/*
-    mot prg[] = {
+/*	
+    cmd_word prg[] = {
         { .codage = { MOV, REGIMM, 3, 0 }},
         { .brut   =   1					  },
-        { .codage = { MOV, REGIMM, 4, 0 }},
+        { .codage = { MOV, REGIMM, 0, 4 }},
         { .brut   =   2					  },
         { .codage = { ADD,  REGREG, 3, 4 }},
-        { .codage = { LOAD, REGDIR, 0, 2 }},
-        { .brut   =   1000                },
+        { .codage = { LOAD, REGDIR, 4, 2 }},
+        { .brut   =   MEMSIZE - 1         },
         { .codage = { JMP,  REGIMM       }},
-        { .brut   =   1500                }
+        { .brut   =   1500                },
+		{ .codage = { HALT				 }}
     };
-    */
+    int memsize = sizeof(prg) / sizeof(cmd_word);
+ */
     
     sivm_load(&debug->sivm, memsize, prg);
 }
@@ -177,9 +181,9 @@ void debugger_start(Debugger *debug)
                         }
                         unsigned int nb = atoi(num);
                         if (!breakpoint_list_add(&breakpoints, nb))
-                            printf("breakpoint exists already\n");
+                            printf("breakpoint already exists\n");
                         else
-                            printf("ajout d'un breakpoint à la ligne %d\n", nb);
+                            printf("added breakpoint at line %d\n", nb);
                     }
                     else if (!strcmp(type, "rm"))
                     {
@@ -198,7 +202,7 @@ void debugger_start(Debugger *debug)
                 }
                 break;
             case UNKNOWN:
-                printf("command unknown\n");
+                printf("Unknown command\n");
             case HELP:
                 displayHelp();
                 break;
@@ -208,7 +212,7 @@ void debugger_start(Debugger *debug)
         {
             if (end_found)
             {
-                printf("la fin du programme est atteinte\n");
+                printf("End of program reached\n");
                 break;
             }
 

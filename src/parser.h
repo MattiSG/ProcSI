@@ -16,7 +16,7 @@
  *@param    str     the source code of the program to assemble
  *@returns	false if any error occured (stderr is written in consequence with perror), true if the source is assembled and loaded corretly.
  */
-bool sivm_parse(int* memsize, mot *mem[], char *str);
+bool sivm_parse(int* memsize, cmd_word *mem[], char *str);
 
 /**Parse a procsi assembly file, and loads it in a virtual machine
  *Since mem is allocated in this function, it's up to you to free it when not needed anymore
@@ -25,6 +25,6 @@ bool sivm_parse(int* memsize, mot *mem[], char *str);
  *@param    str     the filename of the source code
  *@returns	false if any error occured (stderr is written in consequence with perror), true if the file is assembled and loaded corretly.
  */
-bool sivm_parse_file(int* memsize, mot *mem[], char *file);
+bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file);
 
 #endif /* PARSER_H */

@@ -76,7 +76,7 @@ typedef struct {
     unsigned int col;
 
     REG pc;
-    mot* mem;
+    cmd_word* mem;
     REG memsize;
     char *program;
     
@@ -149,7 +149,7 @@ mode pseudomode_to_mode(PMode spmode, PMode dpmode)
     return REGISTER;
 }
 
-bool sivm_parse_file(int* memsize, mot *mem[], char *file)
+bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
 {
     bool ret;
     int size;
@@ -335,7 +335,7 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
     return true;
 }
 
-bool parse_1attrib(Parser* parser, mot m[3], unsigned int *instrsize)
+bool parse_1attrib(Parser* parser, cmd_word m[3], unsigned int *instrsize)
 {
     // source
     int sdata, sreg;
@@ -383,7 +383,7 @@ bool parse_1attrib(Parser* parser, mot m[3], unsigned int *instrsize)
     return true;
 }
 
-bool parse_2attribs(Parser* parser, mot m[3], unsigned int *instrsize)
+bool parse_2attribs(Parser* parser, cmd_word m[3], unsigned int *instrsize)
 {
     // source
     int sdata, sreg;
@@ -452,7 +452,7 @@ bool parse_2attribs(Parser* parser, mot m[3], unsigned int *instrsize)
 bool parse_pass_line(Parser* parser, char *line)
 {
     char instr[256];
-    mot m[3];
+    cmd_word m[3];
     unsigned int instrsize;
 
     parser->cur = line;
@@ -681,7 +681,7 @@ bool parse_second_pass(Parser* parser)
     return true;
 }
 
-bool sivm_parse(int* memsize, mot *mem[], char *str)
+bool sivm_parse(int* memsize, cmd_word *mem[], char *str)
 {
     Parser parser;
 

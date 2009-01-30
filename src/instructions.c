@@ -8,7 +8,7 @@
 /**Emulates the LOAD command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_load(SIVM *sivm, REG *dest, const mot source)
+bool instr_load(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	*dest = source.brut;
     return true;
@@ -17,7 +17,7 @@ bool instr_load(SIVM *sivm, REG *dest, const mot source)
 /**Emulates the STR command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_store(SIVM *sivm, REG *dest, const mot source)
+bool instr_store(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	*dest = source.brut;
     return true;
@@ -26,7 +26,7 @@ bool instr_store(SIVM *sivm, REG *dest, const mot source)
 /**Emulates the ADD command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_add(SIVM *sivm, REG *dest, const mot source)
+bool instr_add(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	*dest += source.brut;
 	sivm->sr = *dest;
@@ -36,7 +36,7 @@ bool instr_add(SIVM *sivm, REG *dest, const mot source)
 /**Emulates the SUB command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_sub(SIVM *sivm, REG *dest, const mot source)
+bool instr_sub(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	*dest -= source.brut;
 	sivm->sr = *dest;
@@ -50,7 +50,7 @@ bool instr_sub(SIVM *sivm, REG *dest, const mot source)
  *@param	source	the adress at which the PC register of the given SIVM should be put at.
  *@return	true if the command was successful, false if the PC argument is out of memory bounds.
  */
-bool instr_jmp(SIVM *sivm, REG *dest, const mot source)
+bool instr_jmp(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	if (source.brut > MEMSIZE) {
 		logm("Jumping too far!", 0);
@@ -63,7 +63,7 @@ bool instr_jmp(SIVM *sivm, REG *dest, const mot source)
 /**Emulates the JEQ command in the given SIVM.
  *@see	instr_jmp
  */
-bool instr_jeq(SIVM *sivm, REG *dest, const mot source)
+bool instr_jeq(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	if (sivm->sr == 0)
 		return instr_jmp(sivm, dest, source);
@@ -73,7 +73,7 @@ bool instr_jeq(SIVM *sivm, REG *dest, const mot source)
 /**Emulates the PUSH command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_push(SIVM *sivm, REG *dest, const mot source)
+bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	int newSp = sivm->sp + SP_INCR;
 	if (newSp > MEMSIZE || newSp < 0) {
@@ -88,7 +88,7 @@ bool instr_push(SIVM *sivm, REG *dest, const mot source)
 /**Emulates the POP command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_pop(SIVM *sivm, REG *dest, const mot source)
+bool instr_pop(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	int newSp = sivm->sp - SP_INCR;
 	if (newSp > MEMSIZE || newSp < 0) {
@@ -114,7 +114,7 @@ bool instr_pop(SIVM *sivm, REG *dest, const mot source)
 /**Emulates the MOV command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_mov(SIVM *sivm, REG *dest, const mot source)
+bool instr_mov(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	*dest = source.brut;
 	sivm->sr = *dest;
@@ -149,7 +149,7 @@ Instr instructions[] = {
  *The whole instruction word is tested, in order to determine whether the adressing modes used in it are legal for the instruction it contains.
  *@return	true if the adressing modes are legal.
  */
-bool checkModes(const mot m)
+bool checkModes(const cmd_word m)
 {
     return getInstruction(m).modes & (1 << m.codage.mode);
 }
@@ -158,7 +158,7 @@ bool checkModes(const mot m)
  *This accessor is an interface to the private "instructions" array.
  *@see	instructions.h#Instr
  */
-Instr getInstruction(const mot m)
+Instr getInstruction(const cmd_word m)
 {
 	return instructions[m.codage.codeop];
 }

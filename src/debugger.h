@@ -7,7 +7,7 @@
 typedef struct
 {
     SIVM sivm;
-    mot *program;
+    cmd_word *program;
 } Debugger;
 
 void debugger_new(Debugger *debug);
