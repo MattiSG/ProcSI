@@ -327,6 +327,55 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
     return true;
 }
 
+/**Parses instructions having just a destination
+ *@param    parser      pointer to the Parser structure
+ *@param    m           output array containing the instruction (and value if needed)
+ *@param    instrsize   size of the instruction, and then size of m array
+ *@returns	false if any error occurs
+ */
+bool parse_dest(Parser* parser, cmd_word m[3], unsigned int *instrsize)
+{
+    // dest
+    int ddata, dreg;
+    PMode dpmode;
+
+    // assert there is at least one whitespace before
+    if(!isblank(*parser->cur))
+    {
+        logm(LOG_ERROR, "Unexpected token at %d:%d : `%c'",
+             parser->row, parser->col, *parser->cur);
+        return false;
+    }
+
+    // read the destination
+    if(!parse_attrib(parser, &dpmode, &ddata, &dreg))
+    {
+        return false;
+    }
+    if(dpmode == PM_REG || dpmode == PM_IND)
+        m[0].codage.dest = dreg;
+    if(dpmode == PM_IMM || dpmode == PM_DIR)
+        m[(*instrsize)++].brut = ddata;
+    
+    // guess the mode
+    switch(dpmode)
+    {
+    case PM_REG:
+    case PM_IND:
+    case PM_DIR:
+        m[0].codage.mode = pseudomode_to_mode(parser, PM_REG, dpmode);
+        break;
+    case PM_IMM:
+        m[0].codage.mode = pseudomode_to_mode(parser, PM_DIR, dpmode);
+        break;
+    }
+
+    for(; isblank(*parser->cur); parser->col++,parser->cur++)
+    {}
+    
+    return true;
+}
+
 /**Parses instructions having just a source
  *@param    parser      pointer to the Parser structure
  *@param    m           output array containing the instruction (and value if needed)
@@ -450,6 +499,11 @@ bool parse_instruction(Parser* parser, cmd_word m[3], unsigned int *instrsize)
 			return parse_destsource(parser, m, instrsize);
 		else
 			return parse_source(parser, m, instrsize);
+    }
+    else
+    {
+        if (instr.destination)
+            return parse_dest(parser, m, instrsize);
     }
 	return true;
 }
