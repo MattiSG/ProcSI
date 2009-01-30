@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "instructions.h"
 #include <ctype.h>
 
 /**@name	Label lists*/
@@ -96,11 +97,11 @@ typedef enum {
 
 /**Transforms two pseudo-modes to a complete mode
  *This function is using switches since we cannot base on cutting the mode in two bits
- @param    spmode   source pseudo-mode
- @param    dpmode   destination pseudo-mode
+ *@param    spmode   source pseudo-mode
+ *@param    dpmode   destination pseudo-mode
  *@see	   parser.c#enum PMode
  *@see	   instructions.h#enum mode
- @returns  A mode ready to be placed into a mot structure
+ *@returns  A mode ready to be placed into a mot structure
  */
 mode pseudomode_to_mode(PMode spmode, PMode dpmode)
 {
@@ -153,31 +154,44 @@ bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
 {
     bool ret;
     int size;
-    FILE* f = fopen(file, "r");
+    FILE* f;
+
+    f = fopen(file, "r");
     if(f == NULL) {
         perror("fopen");
         return false;
     }
+
+    // get size of the file
     fseek(f, 0, SEEK_END);
     size = ftell(f);
     rewind(f);
     
+    // the whole thing
     char buffer[size + sizeof('\0')];
-
     fread(buffer, size + sizeof('\0'), 1, f);
     buffer[size] = '\0';
+
+    // let's parse!
     ret = sivm_parse(memsize, mem, buffer);
+
     fclose(f);
 
     return ret;
 }
 
-bool iswhitespace(char c)
+/*bool isblank(char c)
 {
     return c == ' ' || c == '\t';
-}
+}*/
 
-int ascii2base(char ascii, int base)
+/**Converts an ascii character to it's value according to base
+ *Only supported bases are base 2, 10 and 16
+ *@param   ascii   ascii value of number to convert
+ *@param   base    destination base
+ *@returns The value of the character corresponding the base
+ */
+char ascii2base(char ascii, int base)
 {
     switch(base)
     {
@@ -208,11 +222,15 @@ bool parse_number(Parser* parser, int* value, bool modifiable)
     {
         if(modifiable)
         {
+            // binary
             if(*parser->cur == 'b' &&
                (*(parser->cur+1) == '0' || *(parser->cur+1) == '1'))
             {
                 base = 2;
+                parser->cur++;
+                parser->col++;
             }
+            // label
             else
             {
                 REG reg;
@@ -232,9 +250,15 @@ bool parse_number(Parser* parser, int* value, bool modifiable)
         }
     }
     
+    // hexa
     if(*parser->cur == '0' && *(parser->cur + 1) == 'x')
+    {
         base = 16;
+        parser->cur += 2;
+        parser->col += 2;
+    }
     
+    // initialize
     *value = 0;
     
     // read the number
@@ -261,7 +285,7 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
     int n;
     
     // skipy
-    for(; iswhitespace(*parser->cur); parser->cur++,parser->col++)
+    for(; isblank(*parser->cur); parser->cur++,parser->col++)
     {}
     
     // indirect and direct mode are specified by [ ]
@@ -321,7 +345,7 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
     // indrect and direct mode are closed by ']'
     if(ispointer)
     {
-        for(; iswhitespace(*parser->cur); parser->cur++,parser->col++)
+        for(; isblank(*parser->cur); parser->cur++,parser->col++)
         {}
 
         if(*parser->cur != ']')
@@ -335,14 +359,20 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
     return true;
 }
 
-bool parse_1attrib(Parser* parser, cmd_word m[3], unsigned int *instrsize)
+/**Parses instructions having just a source
+ *@param    parser      pointer to the Parser structure
+ *@param    m           output array containing the instruction (and value if needed)
+ *@param    instrsize   size of the instruction, and then size of m array
+ *@returns	false if any error occurs
+ */
+bool parse_source(Parser* parser, cmd_word m[3], unsigned int *instrsize)
 {
     // source
     int sdata, sreg;
     PMode spmode;
 
     // assert there is at least one whitespace before
-    if(!iswhitespace(*parser->cur))
+    if(!isblank(*parser->cur))
     {
         fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
                 parser->row, parser->col, *parser->cur);
@@ -360,8 +390,7 @@ bool parse_1attrib(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     if(spmode == PM_IMM || spmode == PM_DIR)
         m[(*instrsize)++].brut = sdata;
 
-    for(; iswhitespace(*parser->cur);
-        parser->col++,parser->cur++)
+    for(; isblank(*parser->cur); parser->col++,parser->cur++)
     {}
 
     switch(spmode)
@@ -383,7 +412,13 @@ bool parse_1attrib(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     return true;
 }
 
-bool parse_2attribs(Parser* parser, cmd_word m[3], unsigned int *instrsize)
+/**Parses instructions having destination and source (in that order)
+ *@param    parser      pointer to the Parser structure
+ *@param    m           output array containing the instruction (and value(s) if needed)
+ *@param    instrsize   size of the instruction, and then size of m array
+ *@returns	false if any error occurs
+ */
+bool parse_destsource(Parser* parser, cmd_word m[3], unsigned int *instrsize)
 {
     // source
     int sdata, sreg;
@@ -394,7 +429,7 @@ bool parse_2attribs(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     PMode dpmode;
 
     // assert there is at least one whitespace before
-    if(!iswhitespace(*parser->cur))
+    if(!isblank(*parser->cur))
     {
         fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
                 parser->row, parser->col, *parser->cur);
@@ -425,8 +460,7 @@ bool parse_2attribs(Parser* parser, cmd_word m[3], unsigned int *instrsize)
         exit(1);
     }
 
-    for(; iswhitespace(*parser->cur);
-        parser->col++,parser->cur++)
+    for(; isblank(*parser->cur); parser->col++,parser->cur++)
     {}
 
     // read the source
@@ -440,15 +474,41 @@ bool parse_2attribs(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     if(spmode == PM_IMM || spmode == PM_DIR)
         m[(*instrsize)++].brut = sdata;
 
-    for(; iswhitespace(*parser->cur);
-        parser->col++,parser->cur++)
+    for(; isblank(*parser->cur); parser->col++,parser->cur++)
     {}
 
+    // guess the mode
     m[0].codage.mode = pseudomode_to_mode(spmode, dpmode);
 
     return true;
 }
 
+/**Parses a single instruction knowing it's opcode
+ *@param    parser      pointer to the Parser structure
+ *@param    m           output array containing the instruction (and value if needed)
+ *@param    instrsize   size of the instruction, and then size of m array
+ *@returns	false if any error occurs
+ */
+bool parse_instruction(Parser* parser, cmd_word m[3], unsigned int *instrsize)
+{
+    Instr instr = getInstruction(m[0]);
+    switch(instr.nargs)
+    {
+    case 0:
+        return true;
+    case 1:
+        return parse_source(parser, m, instrsize);
+    case 2:
+        return parse_destsource(parser, m, instrsize);
+    }
+    return false;
+}
+
+/**Parses one line of assembly code
+ *@param    parser      pointer to the Parser structure
+ *@param    line        pointer to line's string
+ *@returns	false if any error occurs
+ */
 bool parse_pass_line(Parser* parser, char *line)
 {
     char instr[256];
@@ -459,7 +519,7 @@ bool parse_pass_line(Parser* parser, char *line)
     parser->col = 1;
 
     // skipy
-    for(; iswhitespace(*parser->cur);
+    for(; isblank(*parser->cur);
         parser->col++, parser->cur++)
     {}
 
@@ -483,81 +543,54 @@ bool parse_pass_line(Parser* parser, char *line)
 
         // load SOURCE, DEST
         if(!strcmp(instr, "load"))
-        {
             m[0].codage.codeop = LOAD;
-            if(!parse_2attribs(parser, m, &instrsize))
-                return false;
-        }
+
         // store SOURCE, DEST
         else if(!strcmp(instr, "store"))
-        {
             m[0].codage.codeop = STORE;
-            if(!parse_2attribs(parser, m, &instrsize))
-                return false;
-        }
+
         // add SOURCE, DEST
         else if(!strcmp(instr, "add"))
-        {
             m[0].codage.codeop = ADD;
-            if(!parse_2attribs(parser, m, &instrsize))
-                return false;
-        }
+
         // sub SOURCE, DEST
         else if(!strcmp(instr, "sub"))
-        {
             m[0].codage.codeop = SUB;
-            if(!parse_2attribs(parser, m, &instrsize))
-                return false;
-        }
+
         // jmp SOURCE
         else if(!strcmp(instr, "jmp"))
-        {
             m[0].codage.codeop = JMP;
-            if(!parse_1attrib(parser, m, &instrsize))
-                return false;
-        }
+
         // jeq SOURCE
         else if(!strcmp(instr, "jeq"))
-        {
             m[0].codage.codeop = JEQ;
-            if(!parse_1attrib(parser, m, &instrsize))
-                return false;
-        }
+
         // call SOURCE
         else if(!strcmp(instr, "call"))
-        {
             m[0].codage.codeop = CALL;
-            if(!parse_1attrib(parser, m, &instrsize))
-                return false;
-        }
+
         // ret
         else if(!strcmp(instr, "ret"))
-        {
             m[0].codage.codeop = RET;
-        }
+
         // push SOURCE
         else if(!strcmp(instr, "push"))
-        {
             m[0].codage.codeop = PUSH;
-            if(!parse_1attrib(parser, m, &instrsize))
-                return false;
-        }
+
         // pop DEST
         else if(!strcmp(instr, "pop"))
-        {
             m[0].codage.codeop = POP;
-            if(!parse_1attrib(parser, m, &instrsize))
-                return false;
-        }
+
         // halt
         else if(!strcmp(instr, "halt"))
-        {
             m[0].codage.codeop = HALT;
-        }
+
         else
-        {
-            instrsize = 0;
-        }
+            // no instruction found, go to next line
+            return true;
+        
+        if (!parse_instruction(parser, m, &instrsize))
+            return false;
         
         // write instruction into the memory
         if(instrsize > 0)
@@ -699,7 +732,7 @@ bool sivm_parse(int* memsize, cmd_word *mem[], char *str)
         return false;
     }
 
-    // 
+    // write
     *memsize = parser.memsize;
     *mem = parser.mem;
 
