@@ -57,26 +57,28 @@ void displayHelp()
 
 void debugger_new(Debugger *debug)
 {
+    char filename[LINE_MAX];
+
     sivm_new(&debug->sivm);
 
     /*
     printf("Quel fichier voulez-vous utiliser ? ");
     fflush(stdout);
 
-    char filename[LINE_MAX];
     readLine(filename, LINE_MAX);
     printf("Fichier : \"%s\"\n", filename);
     */
+    strcpy(filename, "test.procsi");
 
-    // mot prg[MEMSIZE];
-    /*
     mot *prg;
-    int *size;
-    fct(filename, prg, &size);
-    size = fct(filename, prg);
-    */
+    int memsize;
+    if(!sivm_parse_file(&memsize, &prg, filename))
+    {
+        quit("Can't load / assemble file");
+    }
 
-	mot prg[] = {
+	/*
+    mot prg[] = {
         { .codage = { MOV, REGIMM, 3, 0 }},
         { .brut   =   1					  },
         { .codage = { MOV, REGIMM, 4, 0 }},
@@ -87,9 +89,9 @@ void debugger_new(Debugger *debug)
         { .codage = { JMP,  REGIMM       }},
         { .brut   =   1500                }
     };
-    // sivm_parse_file(MEMSIZE, prg, "test.procsi");
-	
-    sivm_load(&debug->sivm, sizeof(prg) / sizeof(mot), prg);
+    */
+    
+    sivm_load(&debug->sivm, memsize, prg);
 }
 
 void debugger_start(Debugger *debug)
