@@ -30,11 +30,11 @@ int main(int argc, char *argv[])
     }
     else if (argc == 4 && (!strncmp("--compile", argv[1], 9) || !strncmp("-c", argv[1], 2)))
     {
-        int memsize;
-        cmd_word *prg;
-        if (!sivm_parse_file(&memsize, &prg, argv[3]))
+        ParserResult presult;
+
+        if (!sivm_parse_file(&presult, argv[3]))
             logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
-        save_program(argv[2], prg, memsize);
+        save_program(argv[2], presult.mem, presult.memsize);
     }
     else if (argc == 3 && (!strncmp("--source", argv[1], 8) || !strncmp("-s", argv[1], 2)))
     {

@@ -2,71 +2,6 @@
 #include "instructions.h"
 #include <ctype.h>
 
-/**@name	Label lists*/
-//@{
-
-/**Chained list of labels
- *Helps the assembleur to remember at which address labels are located.
- *A label is caractised by it's name, and it's address (or pointer)
- */
-typedef struct _LblListElm LblListElm;
-struct _LblListElm {
-    char *name;
-    REG pointer;
-
-    LblListElm *next;
-};
-
-/**Adds a label
- *@param    head    pointer to the head of the list (NULL is empty / no list)
- *@param    ptr     the label's address
- *@param    name    label's name
- *@param    len     len of the label name
- *@returns	Address to the new head of list
- */
-LblListElm *lbllist_add(LblListElm *head, REG ptr, char *name, size_t len)
-{
-    LblListElm *newhead = malloc(sizeof(*newhead));
-
-    newhead->next = head;
-    newhead->pointer = ptr;
-    newhead->name = malloc(len + 1);
-    strncpy(newhead->name, name, len);
-
-    return newhead;
-}
-
-/**Get the next link in the chained list of labels
- *@param    current pointer to the element you want to get the next one
- *@returns	Address of the next element. NULL if end of list
- */
-LblListElm *lbllist_next(LblListElm *current)
-{
-    return current->next;
-}
-
-/**Pick a label element from the list
- *@param    head    pointer to the head of the list
- *@param    name    label's name
- *@param    len     len of the label name
- *@param    pointer output pointer to label's address
- *@returns	true if element is found and pointer is written. false is no corresponding element found
- */
-bool lbllist_get(LblListElm *head, char *name, size_t len, REG *pointer)
-{
-    for(LblListElm* lbl = head; lbl; lbl = lbllist_next(lbl))
-    {
-        if(!strncmp(lbl->name, name, len))
-        {
-            *pointer = lbl->pointer;
-            return true;
-        }
-    }
-
-    return false;
-}
-//@}
-
 /**Parser structure. Helps during parsing
  *It's role is to keep information needed during the parsing, for internal purposes
  */
@@ -78,6 +13,7 @@ typedef struct {
 
     REG pc;
     cmd_word* mem;
+    int* pcline;
     REG memsize;
     FILE* fp;
     
@@ -94,6 +30,37 @@ typedef enum {
     PM_DIR,     // [X]
     //PM_DEP    // X[RY]   //TODO
 } PMode;
+
+LblListElm *lbllist_add(LblListElm *head, REG ptr, char *name, size_t len)
+{
+    LblListElm *newhead = malloc(sizeof(*newhead));
+
+    newhead->next = head;
+    newhead->pointer = ptr;
+    newhead->name = malloc(len + 1);
+    strncpy(newhead->name, name, len);
+
+    return newhead;
+}
+
+LblListElm *lbllist_next(LblListElm *current)
+{
+    return current->next;
+}
+
+bool lbllist_get(LblListElm *head, char *name, size_t len, REG *pointer)
+{
+    for(LblListElm* lbl = head; lbl; lbl = lbllist_next(lbl))
+    {
+        if(!strncmp(lbl->name, name, len))
+        {
+            *pointer = lbl->pointer;
+            return true;
+        }
+    }
+
+    return false;
+}
 
 /**Transforms two pseudo-modes to a complete mode
  *This function is using switches since we cannot base on cutting the mode in two bits
@@ -622,7 +589,7 @@ bool parse_pass_line(Parser* parser, char *line)
                 // second pass
                 for(int i = 0; i < instrsize; i++)
                 {
-                    // printf("[%d] = %d\n", parser->pc, parser->row);
+                    parser->pcline[parser->pc] = parser->row;
                     parser->mem[parser->pc++].brut = m[i].brut;
                 }
             }
@@ -681,6 +648,7 @@ bool parse_first_pass(Parser* parser)
     parser->memsize = parser->pc;
     // allocate the memory correspind size needed to write the code
     parser->mem = malloc(parser->memsize * sizeof(parser->mem[0]));
+    parser->pcline = malloc(parser->memsize * sizeof(parser->pcline[0]));
     
     return true;
 }
@@ -712,7 +680,7 @@ bool parse_second_pass(Parser* parser)
     return true;
 }
 
-bool sivm_parse(int* memsize, cmd_word *mem[], FILE* f)
+bool sivm_parse(ParserResult *presult, FILE* f)
 {
     Parser parser;
     
@@ -731,13 +699,15 @@ bool sivm_parse(int* memsize, cmd_word *mem[], FILE* f)
     }
 
     // write
-    *memsize = parser.memsize;
-    *mem = parser.mem;
+    presult->memsize = parser.memsize;
+    presult->mem = parser.mem;
+    presult->pcline = parser.pcline;
+    presult->labels_head = parser.labels;
 
     return true;
 }
 
-bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
+bool sivm_parse_file(ParserResult *presult, char *file)
 {
     bool ret;
     FILE* f;
@@ -750,7 +720,7 @@ bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
     }
 
     // let's parse!
-    ret = sivm_parse(memsize, mem, f);
+    ret = sivm_parse(presult, f);
 
     fclose(f);
 

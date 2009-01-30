@@ -93,24 +93,25 @@ void debugger_new(Debugger *debug, char *filename, bool isSource)
         strcpy(debug->filename, filename);
     }
 
-    int memsize;
-	cmd_word *prg;
+    ParserResult presult;
+    presult.labels_head = NULL;
+    presult.pcline = NULL;
     if (isSource)
     {
-        if (!sivm_parse_file(&memsize, &prg, debug->filename))
+        if (!sivm_parse_file(&presult, debug->filename))
             logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
         else
             logm(LOG_STEP, "Parsing successful");
     }
     else
     {
-        load_program(debug->filename, &prg, &memsize);
+        load_program(debug->filename, &presult.mem, &presult.memsize);
         logm(LOG_STEP, "Loading successful");
     }
 
     sivm_new(&debug->sivm);
-	debug->program = prg;
-	debug->programSize = memsize;
+	debug->program = presult.mem;
+	debug->programSize = presult.memsize;
 
 /*	//A program loaded in memory has this form:
  
@@ -128,10 +129,10 @@ void debugger_new(Debugger *debug, char *filename, bool isSource)
     };
     int memsize = sizeof(prg) / sizeof(cmd_word);
 */	
-	if (ANSI_OUTPUT) printf("\e[32m");
+	//if (ANSI_OUTPUT) printf("\e[32m");
     printf("Program loaded\n");
-	if (ANSI_OUTPUT) printf("\e[0m");
-    sivm_load(&debug->sivm, memsize, prg);
+	//if (ANSI_OUTPUT) printf("\e[0m");
+    sivm_load(&debug->sivm, presult.memsize, presult.mem);
 }
 
 void debugger_start(Debugger *debug)
