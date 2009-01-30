@@ -158,6 +158,7 @@ void debugger_start(Debugger *debug)
             case STEP:
                 step_by_step = true;
                 execute = true;
+				logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
                 break;
             case QUIT:
                 finish = true;

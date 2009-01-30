@@ -110,10 +110,7 @@ char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
 	
 	char buffer2[sizeof(buffer)];
 	strcpy(buffer2, buffer);
-	sprintf(buffer, "%s%s%s", color, buffer2, (ANSI_OUTPUT ? "\e[0m" : ""));
-	
-	if (paramType == CMD_WORD_DEST_INDEX)
-		strcat(buffer, "\t");
+	sprintf(buffer, "%s%s%s%s", (paramType == CMD_WORD_SOURCE_INDEX ? "\t" : ""), color, buffer2, (ANSI_OUTPUT ? "\e[0m" : ""));
 
 	return strcat(string, buffer);
 }
@@ -189,13 +186,13 @@ char* disassemble(int length, const cmd_word words[])
 				//whole command is 2 words long and the second word (first being the instruction one) is the source parameter
 				case REGIMM:
 				case REGDIR:
-					if (instruction.source && instruction.destination)
+					if (instruction.destination)
 						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
 					
 					if (! disassembler_increment_reading_pointer(length, &i))
 						return strcat(buffer, "***end of program reached***");
-					
-					appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
+					if (instruction.source)
+						appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
 					
 					break;
 					
@@ -205,26 +202,25 @@ char* disassemble(int length, const cmd_word words[])
 					if (! disassembler_increment_reading_pointer(length, &i))
 						return strcat(buffer, "***end of program reached***");
 					
-					if (instruction.source && instruction.destination)
+					if (instruction.destination)
 						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
-					
-					appendParameter(buffer, currentWord, sourceMode, CMD_WORD_SOURCE_INDEX);
+					if (instruction.source)
+						appendParameter(buffer, currentWord, sourceMode, CMD_WORD_SOURCE_INDEX);
 					break;
 					
 				//whole command is 1 word long
 				case REGREG:
 				case REGIND:
-					if (instruction.source && instruction.destination)
+					if (instruction.destination)
 						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
-					
-					appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
+					if (instruction.source)
+						appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
 					break;
 									
 				default:
 					logm(LOG_FATAL_ERROR, "Invalid adressing mode");
 					return false;
 			}
-			strcat(buffer, "\t");
 		}
 		strcat(buffer, "\n");
 	}

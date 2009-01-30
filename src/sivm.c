@@ -261,10 +261,29 @@ void sivm_status(SIVM *sivm)
       	sivm_print_register(sivm, i);
 }
 
-/**Returns the given SIVM's current instruction.*/
-Instr sivm_get_instruction(SIVM *sivm)
+/**Returns the given SIVM's current instruction in disassembly form.*/
+char* sivm_get_instruction_string(SIVM *sivm)
 {
-	checkMemoryAccess(sivm->pc);
-	return getInstruction(sivm->mem[sivm->pc]);
+	mode modes[2];
+	if (getModes((cmd_word*) &sivm->pc, &modes[0], &modes[1]));
+	int wordCount = 1;
+	for (int i = 0; i < 2; i++)
+	{
+		switch (modes[i])
+		{
+			case IMMEDIATE:
+			case DIRECT:
+				wordCount++;
+				break;
+			default:
+				break;
+		}
+	}
+	cmd_word words[wordCount];
+	for (int i = 0; i < wordCount; i++) {
+		checkMemoryAccess(sivm->pc + i);
+		words[i] = sivm->mem[sivm->pc + i];
+	}
+	return disassemble(wordCount, words);
 }
 //@}
