@@ -1,9 +1,7 @@
 
 ; lol
-push #12
 add R3, #1329
 sub R4, #8
-sub #8, R4
 add R3, R4
 add R4, R1
 mov R0, R1

@@ -129,6 +129,7 @@ bool disassembler_increment_reading_pointer(const int max, int *reader)
 char* disassemble(int length, const cmd_word words[])
 {
 	char *buffer = malloc((length + 1) * sizeof(char) * MAX_INSTR_PRINT_SIZE); //+1 for the first line
+    buffer[0] = '\0';
 	strcat(buffer, "Line|\tInstr\tDest\tSource\n---------------------------------\n");
 		   
 	int line = 1;

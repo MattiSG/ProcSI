@@ -598,7 +598,9 @@ bool parse_pass_line(Parser* parser, char *line)
         else
         {
             if (instr[0] == ';' || instr[0] == '#')
+            {
                 return true;
+            }
 
             logm(0, "Unknown instruction `%s'", instr);
         }
