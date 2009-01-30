@@ -606,7 +606,6 @@ bool parse_pass_line(Parser* parser, char *line)
         {
             if(parser->mem)
             {
-                printf("%.2X %.2X\n", m[0].codage.codeop, m[0].codage.mode);
                 if (getInstruction(m[0]).nargs > 0 && !checkModes(m[0]))
                 {
                     logm(0, "Invalid mode for instruction at line %d",
