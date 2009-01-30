@@ -98,7 +98,27 @@ char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
 			strcat(buffer, "??");
 			break;
 	}
+	
+	if (paramType == CMD_WORD_DEST_INDEX)
+		strcat(buffer, "\t");
+	
 	return strcat(string, buffer);
+}
+
+/**Increment the disassembler pointer securely.
+ *Displays an error if the limit is reached too early.
+ */
+bool disassembler_increment_reading_pointer(const int max, int *reader)
+{
+	if ((*reader) + 1 < max)
+	{
+		(*reader)++;
+		return true;
+	}
+	else {
+		logm("Disassembly could not finish properly because the program is not complete!\n\t(adressing mode asks for more words than given)", 2);
+		return false;
+	}
 }
 
 /**Returns a string with the given instructions in assembly form.
@@ -108,9 +128,17 @@ char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
  */
 char* disassemble(int length, const cmd_word words[])
 {
-	char *buffer = malloc(length * sizeof(char) * MAX_INSTR_PRINT_SIZE);
+	char *buffer = malloc((length + 1) * sizeof(char) * MAX_INSTR_PRINT_SIZE); //+1 for the first line
+	strcat(buffer, "Line|\tInstr\tDest\tSource\n---------------------------------\n");
+		   
+	int line = 1;
 	for (int i = 0; i < length; i++)
 	{
+		char lineBuffer[MAX_INSTR_PRINT_SIZE];
+		sprintf(lineBuffer, "%d|\t", line);
+		strcat(buffer, lineBuffer);
+		line++;
+		
 		cmd_word currentWord = words[i];
 		Instr instruction = getInstruction(currentWord);
 		
@@ -119,54 +147,62 @@ char* disassemble(int length, const cmd_word words[])
 		
 		mode sourceMode, destMode;
 		getModes(&currentWord, &destMode, &sourceMode);
-
-		switch (currentWord.codage.mode) {
-			//whole command is 3 words long
-			case DIRIMM:
-			case INDIMM:
-//				if (instruction.nargs > 1)
-//				{
-					if (i + 1 < length)
-						i++;
-					else {
-						logm("Disassembly could not finish properly because the program is not complete!\n(adressing mode asks for more words than given)", 2);
-						return strcat(buffer, "***end of program reached***");
+		
+		if (instruction.nargs > 0)
+		{
+			switch (currentWord.codage.mode) {
+				//whole command is 3 words long
+				case DIRIMM:
+				case INDIMM:
+					if (instruction.nargs > 1) //just for the sake of robustness, this should be forbidden in the parser anyway
+					{
+						if (! disassembler_increment_reading_pointer(length, &i))
+							return strcat(buffer, "***end of program reached***");
+					} else { //normally impossible to encounter
+						logm("Disassembly encountered an incorrect adressing mode\n\t(adressing mode requiring 3 words for a command allowing 1 or less parameter)", 2);
+						return strcat(buffer, "***incorrect number of parameters***");
 					}
-//				}
-
-			//whole command is 2 words long
-			case REGIMM:
-			case REGDIR:
-			case DIRREG:
-			case INDREG:
-//				if (instruction.nargs > 1)
-//				{
-					appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
-					if (i + 1 < length)
-						i++;
-					else {
-						logm("Disassembly could not finish properly because the program is not complete!\n(adressing mode asks for more words than given)", 2);
+					
+				//whole command is 2 words long and the second word (first being the instruction one) is the source parameter
+				case REGIMM:
+				case REGDIR:
+					if (instruction.nargs > 1)
+						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
+					
+					if (! disassembler_increment_reading_pointer(length, &i))
 						return strcat(buffer, "***end of program reached***");
-					}
-//				}
-				break;
-				
-			//whole command is 1 word long
-			case REGREG:
-			case REGIND:
-//				if (instruction.nargs > 1)
-					appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
-				break;
-								
-			default:
-				logm("Invalid adressing mode", 0);
-				return false;
+					
+					appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
+					
+					break;
+					
+				//whole command is 2 words long and the second word (first being the instruction one) is the destination parameter
+				case DIRREG:
+				case INDREG:
+					if (! disassembler_increment_reading_pointer(length, &i))
+						return strcat(buffer, "***end of program reached***");
+					
+					if (instruction.nargs > 1)
+						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
+					
+					appendParameter(buffer, currentWord, sourceMode, CMD_WORD_SOURCE_INDEX);
+					break;
+					
+				//whole command is 1 word long
+				case REGREG:
+				case REGIND:
+					if (instruction.nargs > 1)
+						appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
+					
+					appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
+					break;
+									
+				default:
+					logm("Invalid adressing mode", 0);
+					return false;
+			}
+			strcat(buffer, "\t");
 		}
-		strcat(buffer, "\t");
-		
-//		if (instruction.nargs > 0)
-			appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
-		
 		strcat(buffer, "\n");
 	}
 	return buffer;

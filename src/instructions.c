@@ -154,7 +154,7 @@ bool instr_halt(SIVM *sivm, REG *dest, const cmd_word source)
  *	<li>a pointer to the function emulating the instruction to execute</li>
  *	<li>a bitfield describing which adressing modes are legal for this instruction</li>
  *</ol>
- *The bitfield element is created from bit-to-bit OR operations between all the f_modes enum elements.
+ *The bitfield element is created from bit-to-bit OR operations between all the f_modes enum elements. An instruction whose nargs == 0 should have its bitfield set to 0x0 to get standard behavior from checkModes.
  *@see	instructions.h#enum instructions
  *@see	instructions.h#enum f_modes
  *@see	getInstruction
@@ -174,9 +174,9 @@ Instr instructions[] = {
 	[POP]	= {instr_pop,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"POP"},
 			
 	[CALL]	= {instr_call,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"CALL"},
-	[RET]	= {instr_ret,	0,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"RET"},
+	[RET]	= {instr_ret,	0,	0x0,	"RET"},
 
-	[HALT]	= {instr_halt,	0,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND | FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"HALT"},
+	[HALT]	= {instr_halt,	0,	0x0,	"HALT"},
 };
 
 //@}
@@ -184,7 +184,7 @@ Instr instructions[] = {
 
 /**Tests a word for adressing modes legality.
  *The whole instruction word is tested, in order to determine whether the adressing modes used in it are legal for the instruction it contains.
- *@return	true if the adressing modes are legal.
+ *@return	true if the adressing modes are legal, false in the opposite case or if the command word takes no argument.
  */
 bool checkModes(const cmd_word m)
 {
