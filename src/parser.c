@@ -79,7 +79,7 @@ typedef struct {
     REG pc;
     cmd_word* mem;
     REG memsize;
-    char *program;
+    FILE* fp;
     
     LblListElm *labels;
 } Parser;
@@ -154,42 +154,6 @@ mode pseudomode_to_mode(Parser *parser, PMode spmode, PMode dpmode)
     }
     return REGISTER;
 }
-
-bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
-{
-    bool ret;
-    int size;
-    FILE* f;
-
-    f = fopen(file, "r");
-    if(f == NULL) {
-        logm(0, "Can't open file `%s'", file);
-        perror("fopen");
-        return false;
-    }
-
-    // get size of the file
-    fseek(f, 0, SEEK_END);
-    size = ftell(f);
-    rewind(f);
-    
-    // the whole thing
-    char buffer[size + sizeof('\0')];
-    fread(buffer, size + sizeof('\0'), 1, f);
-    buffer[size] = '\0';
-
-    // let's parse!
-    ret = sivm_parse(memsize, mem, buffer);
-
-    fclose(f);
-
-    return ret;
-}
-
-/*bool isblank(char c)
-{
-    return c == ' ' || c == '\t';
-}*/
 
 /**Converts an ascii character to it's value according to base
  *Only supported bases are base 2, 10 and 16
@@ -605,7 +569,7 @@ bool parse_pass_line(Parser* parser, char *line)
             logm(0, "Unknown instruction `%s'", instr);
         }
         
-        if (!parse_instruction(parser, m, &instrsize))
+        if(!parse_instruction(parser, m, &instrsize))
             return false;
         
         // write instruction into the memory
@@ -622,7 +586,10 @@ bool parse_pass_line(Parser* parser, char *line)
                 
                 // second pass
                 for(int i = 0; i < instrsize; i++)
+                {
+                    // printf("[%d] = %d\n", parser->pc, parser->row);
                     parser->mem[parser->pc++].brut = m[i].brut;
+                }
             }
             else
             {
@@ -641,27 +608,19 @@ bool parse_pass_line(Parser* parser, char *line)
  */
 bool parse_first_pass(Parser* parser)
 {
-    char *save_ptr;
-    char *line;
-    char *program;
-    char program_save[strlen(parser->program) + 1];
-    strcpy(program_save, parser->program);
-    
+    char line[LINE_MAX];
+
     parser->labels = NULL;
     parser->mem = NULL;
-    parser->row = 1;
+    parser->row = 0;
     parser->pc = 0;
     
     // read the buffer line by line
-    for(program = program_save; ; parser->row++)
+    while(fgets(line, sizeof(line), parser->fp) != NULL)
     {
-        line = strtok_r(program, "\n\r", &save_ptr);
-        if (line == NULL)
-            break;
-        program = NULL;
-        
         char instr[256];
         
+        parser->row++;
         parser->cur = line;
         parser->col = 1;
         
@@ -684,7 +643,7 @@ bool parse_first_pass(Parser* parser)
             return false;
         }
     }
-    
+
     parser->memsize = parser->pc;
     // allocate the memory correspind size needed to write the code
     parser->mem = malloc(parser->memsize * sizeof(parser->mem[0]));
@@ -698,23 +657,15 @@ bool parse_first_pass(Parser* parser)
  */
 bool parse_second_pass(Parser* parser)
 {
-    char *save_ptr;
-    char *line;
-    char *program;
-    char program_save[strlen(parser->program) + 1];
-    strcpy(program_save, parser->program);
+    char line[LINE_MAX];
     
-    parser->row = 1;
+    parser->row = 0;
     parser->pc = 0;
     
     // read the buffer line by line
-    for(program = program_save; ; parser->row++)
+    while(fgets(line, sizeof(line), parser->fp) != NULL)
     {
-        line = strtok_r(program, "\n\r", &save_ptr);
-        if (line == NULL)
-            break;
-        program = NULL;
-
+        parser->row++;
         parser->cur = line;
         parser->col = 1;
         
@@ -728,11 +679,11 @@ bool parse_second_pass(Parser* parser)
     return true;
 }
 
-bool sivm_parse(int* memsize, cmd_word *mem[], char *str)
+bool sivm_parse(int* memsize, cmd_word *mem[], FILE* f)
 {
     Parser parser;
-
-    parser.program = str;
+    
+    parser.fp = f;
     
     if(!parse_first_pass(&parser))
     {
@@ -740,6 +691,8 @@ bool sivm_parse(int* memsize, cmd_word *mem[], char *str)
         return false;
     }
     
+    rewind(f);
+
     if(!parse_second_pass(&parser))
     {
         logm(0, "parse_second_pass returned false");
@@ -751,4 +704,24 @@ bool sivm_parse(int* memsize, cmd_word *mem[], char *str)
     *mem = parser.mem;
 
     return true;
+}
+
+bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
+{
+    bool ret;
+    FILE* f;
+
+    f = fopen(file, "r");
+    if(f == NULL) {
+        logm(0, "Can't open file `%s'", file);
+        perror("fopen");
+        return false;
+    }
+
+    // let's parse!
+    ret = sivm_parse(memsize, mem, f);
+
+    fclose(f);
+
+    return ret;
 }
