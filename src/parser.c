@@ -444,16 +444,14 @@ bool parse_destsource(Parser* parser, cmd_word m[3], unsigned int *instrsize)
 bool parse_instruction(Parser* parser, cmd_word m[3], unsigned int *instrsize)
 {
     Instr instr = getInstruction(m[0]);
-    switch(instr.nargs)
-    {
-    case 0:
-        return true;
-    case 1:
-        return parse_source(parser, m, instrsize);
-    case 2:
-        return parse_destsource(parser, m, instrsize);
+    if (instr.source)
+	{
+		if (instr.destination)
+			return parse_destsource(parser, m, instrsize);
+		else
+			return parse_source(parser, m, instrsize);
     }
-    return false;
+	return true;
 }
 
 /**Parses one line of assembly code
@@ -559,7 +557,7 @@ bool parse_pass_line(Parser* parser, char *line)
         {
             if(parser->mem)
             {
-                if (getInstruction(m[0]).nargs > 0 && !checkModes(m[0]))
+                if ((getInstruction(m[0]).source || getInstruction(m[0]).destination) && !checkModes(m[0]))
                 {
                     logm(LOG_ERROR, "Invalid mode for instruction "
                          "at line %d",
