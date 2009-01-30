@@ -1,5 +1,6 @@
 
 ; lol
+push #12
 add R3, #1329
 sub R4, #8
 sub #8, R4

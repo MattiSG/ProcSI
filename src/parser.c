@@ -97,13 +97,14 @@ typedef enum {
 
 /**Transforms two pseudo-modes to a complete mode
  *This function is using switches since we cannot base on cutting the mode in two bits
+ *@param    parser   pointer to a parser structure
  *@param    spmode   source pseudo-mode
  *@param    dpmode   destination pseudo-mode
- *@see	   parser.c#enum PMode
- *@see	   instructions.h#enum mode
+ *@see	    parser.c#enum PMode
+ *@see	    instructions.h#enum mode
  *@returns  A mode ready to be placed into a mot structure
  */
-mode pseudomode_to_mode(PMode spmode, PMode dpmode)
+mode pseudomode_to_mode(Parser *parser, PMode spmode, PMode dpmode)
 {
     switch(dpmode)
     {
@@ -118,8 +119,6 @@ mode pseudomode_to_mode(PMode spmode, PMode dpmode)
             return REGDIR;
         case PM_IND:
             return REGIND;
-        default:
-            return REGISTER;
         }
         break;
     case PM_IND:
@@ -130,11 +129,15 @@ mode pseudomode_to_mode(PMode spmode, PMode dpmode)
         case PM_IMM:
             return INDIMM;
         default:
-            return INDIRECT;
+            logm(0, "Mode can't be INDDIR / INDIND at %d:%d",
+                 parser->row, parser->col);
+            exit(1);
         }
         break;
     case PM_IMM:
-        return IMMEDIATE;
+        logm(0, "Mode can't be IMMREG / IMMIMM / IMMDIR / IMMIND at %d:%d",
+             parser->row, parser->col);
+        exit(1);
     case PM_DIR:
         switch(spmode)
         {
@@ -143,7 +146,9 @@ mode pseudomode_to_mode(PMode spmode, PMode dpmode)
         case PM_IMM:
             return DIRIMM;
         default:
-            return DIRECT;
+            logm(0, "Mode can't be DIRDIR / DIRIND at %d:%d",
+                 parser->row, parser->col);
+            exit(1);
         }
         break;
     }
@@ -479,7 +484,7 @@ bool parse_destsource(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     {}
 
     // guess the mode
-    m[0].codage.mode = pseudomode_to_mode(spmode, dpmode);
+    m[0].codage.mode = pseudomode_to_mode(parser, spmode, dpmode);
 
     return true;
 }
@@ -666,7 +671,6 @@ bool parse_first_pass(Parser* parser)
             {
                parser->labels = lbllist_add(parser->labels, parser->pc, instr,
                                             len - 1);
-               // printf("added %s @ %.4X", instr, parser->pc);
             }
         }
 
