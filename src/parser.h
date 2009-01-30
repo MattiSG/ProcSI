@@ -19,4 +19,7 @@
  */
 bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file);
 
+void save_program(char *filename, cmd_word mem[], int memsize);
+void load_program(char *filename, cmd_word *mem[], int *memsize);
+
 #endif /* PARSER_H */

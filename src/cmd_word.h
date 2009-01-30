@@ -5,7 +5,7 @@
 #include "instructions.h"
 
 /**Maximum length for a string representing a command word in assembly code.*/
-#define MAX_INSTR_PRINT_SIZE 15
+#define MAX_INSTR_PRINT_SIZE 200
 
 bool getModes(cmd_word *w, mode *destMode, mode *sourceMode);
 

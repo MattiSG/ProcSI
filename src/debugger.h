@@ -10,8 +10,9 @@
  */
 typedef struct
 {
-    SIVM sivm;         /*!< pointer to virtual machine */
-    cmd_word *program; /*!< pointer to array of commands */
+    SIVM sivm;          /*!< pointer to virtual machine */
+    cmd_word *program;  /*!< pointer to array of commands */
+    char *filename;     /*!< filename of the binary program */
 	size_t programSize; /*!< size of the loaded program, in number of cmd_word*/
 } Debugger;
 
@@ -19,7 +20,7 @@ typedef struct
  * \fn    void debugger_new(Debugger *debug)
  * \brief Initialize a Debugger structure
  */
-void debugger_new(Debugger *debug);
+void debugger_new(Debugger *debug, char *filename);
 
 /**
  * \fn    void debugger_start(Debugger *debug)

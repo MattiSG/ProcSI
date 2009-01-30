@@ -756,3 +756,22 @@ bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
 
     return ret;
 }
+
+void save_program(char *filename, cmd_word mem[], int memsize)
+{
+    FILE *f = fopen(filename, "wb");
+    fprintf(f, "%d\n", memsize);
+    fwrite(mem, memsize, sizeof(cmd_word), f);
+    fclose(f);
+}
+
+void load_program(char *filename, cmd_word *mem[], int *memsize)
+{
+    FILE *f = fopen(filename, "rb");
+    char buf[LINE_MAX];
+    fgets(buf, LINE_MAX, f);
+    *memsize = atoi(buf);
+	*mem     = malloc(sizeof(cmd_word) * (*memsize));
+    fread(*mem, sizeof(cmd_word), (*memsize), f);
+    fclose(f);
+}

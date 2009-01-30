@@ -85,25 +85,19 @@ void display_help()
         printf((ANSI_OUTPUT ? "  \e[33m%s\e[0m:\t%s\n" : "  %s:\t%s\n"), commands[i].name, commands[i].help);
 }
 
-void debugger_new(Debugger *debug)
+void debugger_new(Debugger *debug, char *filename)
 {
-    char filename[LINE_MAX];
-    /*
-    printf("Quel fichier voulez-vous utiliser ? ");
-    fflush(stdout);
+    if (filename)
+    {
+        debug->filename = (char*)malloc(strlen(filename));
+        strcpy(debug->filename, filename);
+    }
 
-    readLine(filename, LINE_MAX);
-    printf("Fichier : \"%s\"\n", filename);
-    */
-    strcpy(filename, "examples/test.procsi");
-
-	cmd_word *prg;
     int memsize;
-    if (! sivm_parse_file(&memsize, &prg, filename))
-        logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
-    else
-        logm(LOG_STEP, "Parsing successful");
-	
+	cmd_word *prg;
+    load_program(debug->filename, &prg, &memsize);
+    logm(LOG_STEP, "Parsing successful");
+
     sivm_new(&debug->sivm);
 	debug->program = prg;
 	debug->programSize = memsize;
@@ -165,7 +159,7 @@ void debugger_start(Debugger *debug)
                 execute = false;
                 break;
             case RESTART:
-                debugger_new(debug);
+                debugger_new(debug, 0);
                 end_found = false;
                 step_by_step = true;
                 execute = false;
