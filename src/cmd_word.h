@@ -7,6 +7,8 @@
 /**Maximum length for a string representing a command word in assembly code.*/
 #define MAX_INSTR_PRINT_SIZE 15
 
-bool getModes(cmd_word *word, mode *destMode, mode *sourceMode);
+bool getModes(cmd_word *w, mode *destMode, mode *sourceMode);
+
+char* disassemble(int length, const cmd_word words[]);
 
 #endif

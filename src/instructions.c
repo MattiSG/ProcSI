@@ -121,6 +121,15 @@ bool instr_mov(SIVM *sivm, REG *dest, const cmd_word source)
     return true;
 }
 
+/**Emulates the HALT command in the given SIVM.
+ *@return	false, in order to stop the VM.
+ */
+bool instr_halt(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	logm("HALT instruction encountered.", 3);
+    return false;
+}
+
 /**Describes all available instructions.
  *This array has keys taken from the "instructions" enum, and its values describe the corresponding instructions, as an array containing :
  *<ol>
@@ -139,7 +148,8 @@ Instr instructions[] = {
 	[SUB] = {instr_sub,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SUB"},
 	[JMP] = {instr_jmp,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JMP"},
 	[JEQ] = {instr_jeq,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
-	[MOV] = {instr_mov,		FM_REGREG | FM_REGIMM,							"MOV"}
+	[MOV] = {instr_mov,		FM_REGREG | FM_REGIMM,							"MOV"},
+	[HALT] = {instr_halt,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND | FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"HALT"},
 };
 
 //@}

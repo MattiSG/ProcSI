@@ -7,6 +7,7 @@
 #include "breakpoint.h"
 #include "instructions.h"
 #include "util.h"
+#include "cmd_word.h"
 
 typedef struct
 {
@@ -80,6 +81,7 @@ void debugger_new(Debugger *debug)
     //printf("%d %d %d %d\n", prg[0].codage.codeop, prg[0].codage.mode, prg[0].codage.source, prg[0].codage.dest);
     //printf("taille => %d\n", memsize);
  
+ 
 
 /*	
     cmd_word prg[] = {
@@ -95,8 +97,8 @@ void debugger_new(Debugger *debug)
 		{ .codage = { HALT				 }}
     };
     int memsize = sizeof(prg) / sizeof(cmd_word);
- */
-    
+*/	
+    printf("Loaded program:\n%s", disassemble(memsize, prg));
     sivm_load(&debug->sivm, memsize, prg);
 }
 

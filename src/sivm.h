@@ -9,7 +9,6 @@
 
 typedef uint16_t REG;
 
-
 /**@name	SIVM parameters*/
 //@{
 /**Number of registers in an SIVM.*/
@@ -29,6 +28,16 @@ typedef uint16_t REG;
 #define SP_INCR -1
 //@}
 
+
+/**@name	Command words definition
+ *Defines the order of components in a command word, and the inner form of a command word too.
+ */
+//@{
+#define CMD_WORD_OPCODE_INDEX 0
+#define CMD_WORD_MODE_INDEX 1
+#define CMD_WORD_SOURCE_INDEX 2
+#define CMD_WORD_DEST_INDEX 3
+
 /*This definition isn't in cmd_word.h because of unresolvable recursive includes.*/
 typedef union
 {
@@ -41,6 +50,7 @@ typedef union
 		unsigned dest   : 3;
 	} codage;
 } cmd_word;
+//@}
 
 typedef struct {
     REG pc;

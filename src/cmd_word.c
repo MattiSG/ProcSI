@@ -11,9 +11,9 @@
  *@param	destMode	pointer to the destination mode variable to set
  *@return	false if the given modes are illegal
  */
-bool getModes(cmd_word *word, mode *destMode, mode *sourceMode)
+bool getModes(cmd_word *w, mode *destMode, mode *sourceMode)
 {
-	switch (word->codage.mode) {
+	switch (w->codage.mode) {
 		case REGREG:
 			*destMode = REGISTER;
 			*sourceMode = REGISTER;
@@ -59,19 +59,54 @@ bool getModes(cmd_word *word, mode *destMode, mode *sourceMode)
 /**Appends the given word's command name at the end of the given string.
  *@returns	pointer to the populated string
  */
-char* appendName(char *string, const cmd_word w)
+char* appendInstructionName(char *string, const cmd_word w)
 {
 	return strcat(string, getInstruction(w).name);
 }
 
-/**Appends the given parameter at the end of the given string.
+/**Appends the given source parameter at the end of the given string.
  *@param	string	the string to populate
- *@param	w		the word representing the parameter. If the mode makes the a
+ *@param	w		the word containing the parameter's value. If the mode makes the parameter one that should be given in a whole word (ie. IMMEDIATE or DIRECT), this parameter w has to be the full word, not the one containing the instruction. On the contrary, if the mode makes the parameter one that is included in the command word, you have to hand the command word to this function.
+ *@param	m		the adressing mode for the given parameter
+ *@param	paramType	one of the constants defined in sivm.h defining the indexes of source/dest parameters in a command word. Has to be set if parameter w is the command word itself, will be ignored if w is a rough adress.
  *@returns	pointer to the populated string
  */
-char* appendParameter(char *string, const cmd_word w, mode m)
+char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
 {
-	return strcat(string, getInstruction(w).name);
+	char buffer[MAX_INSTR_PRINT_SIZE];
+	switch (m) {
+		case REGISTER:
+			if (paramType == CMD_WORD_SOURCE_INDEX)
+				sprintf(buffer, "R%d", w.codage.source);
+			else if (paramType == CMD_WORD_DEST_INDEX)
+				sprintf(buffer, "R%d", w.codage.dest);
+			else {
+				logm("Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)", 2);
+				strcat(buffer, "R?");
+			}
+			break;
+		case IMMEDIATE:
+			sprintf(buffer, "#%u", w.brut);
+			break;
+		case DIRECT:
+			sprintf(buffer, "[%u]", w.brut);
+			break;
+		case INDIRECT:
+			if (paramType == CMD_WORD_SOURCE_INDEX)
+				sprintf(buffer, "[R%d]", w.codage.source);
+			else if (paramType == CMD_WORD_DEST_INDEX)
+				sprintf(buffer, "[R%d]", w.codage.dest);
+			else {
+				logm("Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)", 2);
+				strcat(buffer, "[R?]");
+			}
+			break;
+		default:
+			logm("Unable to determine parameter\n(invalid mode argument passed to appendParameter)", 2);
+			strcat(buffer, "??");
+			break;
+	}
+	return strcat(string, buffer);
 }
 
 /**Returns a string with the given instructions in assembly form.
@@ -79,35 +114,57 @@ char* appendParameter(char *string, const cmd_word w, mode m)
  *@param	words	array of cmd_word to disassemble
  *@returns	a string representing words in assembly language
  */
-char* disassemble(size_t length, const cmd_word words[])
+char* disassemble(int length, const cmd_word words[])
 {
 	char *buffer = malloc(length * sizeof(char) * MAX_INSTR_PRINT_SIZE);
 	for (int i = 0; i < length; i++)
 	{
-		cmd_word currentWord = words[length];
-		appendName(buffer, currentWord);
-		strcpy(buffer, "\t");
+		cmd_word currentWord = words[i];
+		appendInstructionName(buffer, currentWord);
+		
+		strcat(buffer, "\t");
+		
+		mode sourceMode, destMode;
+		getModes(&currentWord, &destMode, &sourceMode);
+
 		switch (currentWord.codage.mode) {
-			//whole command is 1 word long
-			case REGREG:
-			case REGIND:
-				break;
-				
+			//whole command is 3 words long
+			case DIRIMM:
+			case INDIMM:
+				if (i + 1 < length)
+					i++;
+				else {
+					logm("Disassembly could not finish properly because the program is not complete!\n(adressing mode asks for more words than given)", 2);
+					return strcat(buffer, "***end of program reached***");
+				}
+
 			//whole command is 2 words long
 			case REGIMM:
 			case REGDIR:
 			case DIRREG:
 			case INDREG:
+				appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
+				if (i + 1 < length)
+					i++;
+				else {
+					logm("Disassembly could not finish properly because the program is not complete!\n(adressing mode asks for more words than given)", 2);
+					return strcat(buffer, "***end of program reached***");
+				}
 				break;
 				
-			//whole command is 3 words long
-			case DIRIMM:
-			case INDIMM:
+			//whole command is 1 word long
+			case REGREG:
+			case REGIND:
+				appendParameter(buffer, words[i], destMode, CMD_WORD_DEST_INDEX);
 				break;
+								
 			default:
 				logm("Invalid adressing mode", 0);
 				return false;
 		}
+		strcat(buffer, "\t");
+		appendParameter(buffer, words[i], sourceMode, CMD_WORD_SOURCE_INDEX);
+		strcat(buffer, "\n");
 	}
 	return buffer;
 }
