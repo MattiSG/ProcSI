@@ -1,17 +1,74 @@
 #include "parser.h"
 #include <ctype.h>
 
+/**@name	Label lists*/
+//@{
+
+/**Chained list of labels
+ *Helps the assembleur to remember at which address labels are located.
+ *A label is caractised by it's name, and it's address (or pointer)
+ */
 typedef struct _LblListElm LblListElm;
 struct _LblListElm {
-    char *str;
+    char *name;
     REG pointer;
 
     LblListElm *next;
 };
 
-LblListElm *lbllist_add(LblListElm *head, REG ptr, char *str, size_t len);
-LblListElm *lbllist_next(LblListElm *current);
+/**Adds a label
+ *@param    head    pointer to the head of the list (NULL is empty / no list)
+ *@param    ptr     the label's address
+ *@param    name    label's name
+ *@param    len     len of the label name
+ *@returns	Address to the new head of list
+ */
+LblListElm *lbllist_add(LblListElm *head, REG ptr, char *name, size_t len)
+{
+    LblListElm *newhead = malloc(sizeof(*newhead));
 
+    newhead->next = head;
+    newhead->pointer = ptr;
+    newhead->name = malloc(len + 1);
+    strncpy(newhead->name, name, len);
+
+    return newhead;
+}
+
+/**Get the next link in the chained list of labels
+ *@param    current pointer to the element you want to get the next one
+ *@returns	Address of the next element. NULL if end of list
+ */
+LblListElm *lbllist_next(LblListElm *current)
+{
+    return current->next;
+}
+
+/**Pick a label element from the list
+ *@param    head    pointer to the head of the list
+ *@param    name    label's name
+ *@param    len     len of the label name
+ *@param    pointer output pointer to label's address
+ *@returns	true if element is found and pointer is written. false is no corresponding element found
+ */
+bool lbllist_get(LblListElm *head, char *name, size_t len, REG *pointer)
+{
+    for(LblListElm* lbl = head; lbl; lbl = lbllist_next(lbl))
+    {
+        if(!strncmp(lbl->name, name, len))
+        {
+            *pointer = lbl->pointer;
+            return true;
+        }
+    }
+
+    return false;
+}
+//@}
+
+/**Parser structure. Helps during parsing
+ *It's role is to keep information needed during the parsing, for internal purposes
+ */
 typedef struct {
     /* per char parsing */
     char *cur;
@@ -26,6 +83,9 @@ typedef struct {
     LblListElm *labels;
 } Parser;
 
+/**Pseudo-modes list
+ *Since the parser have to read one instrution's attribute at one, we need to have invidual parameter for theses.
+ */
 typedef enum {
     PM_REG,     // RX
     PM_IMM,     // #X
@@ -34,23 +94,14 @@ typedef enum {
     //PM_DEP    // X[RY]   //TODO
 } PMode;
 
-LblListElm *lbllist_add(LblListElm *head, REG ptr, char *str, size_t len)
-{
-    LblListElm *newhead = malloc(sizeof(*newhead));
-
-    newhead->next = head;
-    newhead->pointer = ptr;
-    newhead->str = malloc(len + 1);
-    strncpy(newhead->str, str, len);
-
-    return newhead;
-}
-
-LblListElm *lbllist_next(LblListElm *current)
-{
-    return current->next;
-}
-
+/**Transforms two pseudo-modes to a complete mode
+ *This function is using switches since we cannot base on cutting the mode in two bits
+ @param    spmode   source pseudo-mode
+ @param    dpmode   destination pseudo-mode
+ *@see	   parser.c#enum PMode
+ *@see	   instructions.h#enum mode
+ @returns  A mode ready to be placed into a mot structure
+ */
 mode pseudomode_to_mode(PMode spmode, PMode dpmode)
 {
     switch(dpmode)
@@ -164,14 +215,12 @@ bool parse_number(Parser* parser, int* value, bool modifiable)
             }
             else
             {
-                for(LblListElm* lbl = parser->labels; lbl;
-                     lbl = lbllist_next(lbl))
+                REG reg;
+                if(lbllist_get(parser->labels, parser->cur,
+                               strlen(parser->cur) - 1, &reg))
                 {
-                    if(!strncmp(lbl->str, parser->cur, strlen(lbl->str)))
-                    {
-                        *value = lbl->pointer;
-                        return true;
-                    }
+                    *value = reg;
+                    return true;
                 }
             }
         }
