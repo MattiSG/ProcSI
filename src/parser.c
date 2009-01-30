@@ -582,13 +582,21 @@ bool parse_pass_line(Parser* parser, char *line)
         else if(!strcmp(instr, "pop"))
             m[0].codage.codeop = POP;
 
+        // mov DEST, SOURCE
+        else if(!strcmp(instr, "mov"))
+            m[0].codage.codeop = MOV;
+        
         // halt
         else if(!strcmp(instr, "halt"))
             m[0].codage.codeop = HALT;
 
         else
-            // no instruction found, go to next line
-            return true;
+        {
+            if (instr[0] == ';' || instr[0] == '#')
+                return true;
+
+            logm(0, "Unknown instruction `%s'", instr);
+        }
         
         if (!parse_instruction(parser, m, &instrsize))
             return false;
@@ -598,6 +606,7 @@ bool parse_pass_line(Parser* parser, char *line)
         {
             if(parser->mem)
             {
+                printf("%.2X %.2X\n", m[0].codage.codeop, m[0].codage.mode);
                 if (getInstruction(m[0]).nargs > 0 && !checkModes(m[0]))
                 {
                     logm(0, "Invalid mode for instruction at line %d",
