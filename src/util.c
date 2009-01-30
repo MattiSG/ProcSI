@@ -3,18 +3,6 @@
 
 #include "util.h"
 
-void quit(char *format, ...)
-{
-    char errformat[256];
-    sprintf(errformat, "[error] %s\n", format);
-
-    va_list args;
-    va_start(args, format);
-    vfprintf(stderr, errformat, args);
-    va_end(args);
-    exit(1);
-}
-
 bool readLine(char *str, size_t length)
 {
     // construit la chaîne de formatage de l'entrée
@@ -35,17 +23,48 @@ void logm(char level, char *format, ...)
 {
     va_list args;
     va_start(args, format);
+	
+	char *color;
+	switch (level) {
+		case 0:
+			color = "[41m\e[30m";
+			break;
+		case 1:
+			color = "[43m\e[30m";
+			break;
+		case 2:
+			color = "[31m";
+			break;
+		case 5:
+			color = "[34m";
+			break;
+		default:
+			break;
+	}
 
 	if (level <= OUT_LOG_LEVEL)
     {
+		if (ANSI_OUTPUT) {
+			fprintf(stdout, "\e");
+			fprintf(stdout, color);
+		}
         vfprintf(stdout, format, args);
-        fprintf(stdout, "\n");
+        if (ANSI_OUTPUT) fprintf(stdout, "\e[0m\n");
+		else fprintf(stdout, "\n");
     }
 	else if (level <= ERR_LOG_LEVEL)
     {
+		if (ANSI_OUTPUT) {
+			fprintf(stderr, "\e");
+			fprintf(stderr, color);
+		}
         vfprintf(stderr, format, args);
-        fprintf(stderr, "\n");
+        if (ANSI_OUTPUT) fprintf(stdout, "\e[0m\n");
+		else fprintf(stderr, "\n");
     }
-
+	
+	if (level <= FATAL_LEVEL)
+		exit(1);
+		
     va_end(args);
 }

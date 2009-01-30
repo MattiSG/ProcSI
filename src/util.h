@@ -5,21 +5,20 @@
 #include <string.h>
 #include <stdarg.h>
 
-/**@name	Logging levels
- *Defines the level of verbosity of the program.
+/**@name	Display and logging settings
+ *Defines the level of verbosity of the program and level of output formatting.
  *0 is the less verbose mode (displays fatal errors only).
  */
 //@{
+/**Activate colored output or not*/
+#define ANSI_OUTPUT true
 /**Maximum level of messages to be displayed to stderr*/
 #define ERR_LOG_LEVEL 5
 /**Maximum level of messages to be displayed to stdout*/
 #define OUT_LOG_LEVEL 5
+/**Level of message from which error is considered as fatal (exits)*/
+#define FATAL_LEVEL 0
 //@}
-
-/**Quit the programe with an error
- *@param	format		the error message
- */
-void quit(char *format, ...);
 
 /**Read a line from the standard input
  *@param	str		pointer to the string

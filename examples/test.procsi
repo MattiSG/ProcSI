@@ -2,8 +2,8 @@
 ; lol
 add R3, #1329
 sub R4, #8
-add R3, R4
-add R4, R1
+add R3, [R4]
+add R4, [12]
 mov R0, R1
 
 boucle:

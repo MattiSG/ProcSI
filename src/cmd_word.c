@@ -65,43 +65,56 @@ bool getModes(cmd_word *w, mode *destMode, mode *sourceMode)
  */
 char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
 {
-	char buffer[MAX_INSTR_PRINT_SIZE];
+	char *color = "";
+	char buffer[2 * MAX_INSTR_PRINT_SIZE * sizeof(char)];
+	
 	switch (m) {
 		case REGISTER:
+			if (ANSI_OUTPUT) color = "\e[36m";
 			if (paramType == CMD_WORD_SOURCE_INDEX)
 				sprintf(buffer, "R%d", w.codage.source);
 			else if (paramType == CMD_WORD_DEST_INDEX)
 				sprintf(buffer, "R%d", w.codage.dest);
 			else {
 				logm(2, "Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)");
+				if (ANSI_OUTPUT) color = "\e[41m";
 				strcat(buffer, "R?");
 			}
 			break;
 		case IMMEDIATE:
+			if (ANSI_OUTPUT) color = "\e[32m";
 			sprintf(buffer, "#%u", w.brut);
 			break;
 		case DIRECT:
+			if (ANSI_OUTPUT) color = "\e[34m";
 			sprintf(buffer, "[%u]", w.brut);
 			break;
 		case INDIRECT:
+			if (ANSI_OUTPUT) color = "\e[33m";
 			if (paramType == CMD_WORD_SOURCE_INDEX)
 				sprintf(buffer, "[R%d]", w.codage.source);
 			else if (paramType == CMD_WORD_DEST_INDEX)
 				sprintf(buffer, "[R%d]", w.codage.dest);
 			else {
 				logm(2, "Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)");
+				if (ANSI_OUTPUT) color = "\e[41m";
 				strcat(buffer, "[R?]");
 			}
 			break;
 		default:
 			logm(2, "Unable to determine parameter\n(invalid mode argument passed to appendParameter)");
+			if (ANSI_OUTPUT) color = "\e[41m";
 			strcat(buffer, "??");
 			break;
 	}
 	
+	char buffer2[sizeof(buffer)];
+	strcpy(buffer2, buffer);
+	sprintf(buffer, "%s%s%s", color, buffer2, (ANSI_OUTPUT ? "\e[0m" : ""));
+	
 	if (paramType == CMD_WORD_DEST_INDEX)
 		strcat(buffer, "\t");
-	
+
 	return strcat(string, buffer);
 }
 
@@ -131,13 +144,20 @@ char* disassemble(int length, const cmd_word words[])
 	char *buffer = malloc((length + 2) * sizeof(char) * MAX_INSTR_PRINT_SIZE); //+2 for the legend lines
 	buffer[0] = '\0'; //prevent useless characters cross-platform-wise
     buffer[0] = '\0';
+	if (ANSI_OUTPUT)
+		strcat(buffer, "\e[35m");
 	strcat(buffer, "Line|\tInstr\tDest\tSource\n---------------------------------\n");
+	if (ANSI_OUTPUT)
+		strcat(buffer, "\e[0m");
 		   
 	int line = 1;
 	for (int i = 0; i < length; i++)
 	{
 		char lineBuffer[MAX_INSTR_PRINT_SIZE];
-		sprintf(lineBuffer, "%d|\t", line);
+		
+		sprintf(lineBuffer, (ANSI_OUTPUT ? "\e[35m%d|\t" : "%d|\t"), line);
+		if (ANSI_OUTPUT) strcat(lineBuffer, "\e[0m");
+		
 		strcat(buffer, lineBuffer);
 		line++;
 		
@@ -145,6 +165,7 @@ char* disassemble(int length, const cmd_word words[])
 		Instr instruction = getInstruction(currentWord);
 		
 		strcat(buffer, instruction.name);
+		
 		strcat(buffer, "\t");
 		
 		mode sourceMode, destMode;

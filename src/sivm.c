@@ -214,16 +214,51 @@ bool sivm_exec(SIVM *sivm, cmd_word *word)
 
 /**@name	SIVM status inquiry*/
 //@{
+/**Prints the given SIVM's register value.
+ *@returns	true if the register is a legal one, false if no corresponding register was found (won't print diagnostic message in this case)
+ */
+bool sivm_print_register(SIVM *sivm, unsigned int reg)
+{
+	switch (reg) {
+		case PC:
+			printf("PC = %d\n", sivm->pc);
+			break;
+		case SR:
+			printf("SR = %d\n", sivm->sr);
+			break;
+		case SP:
+			printf("SP = %d\n", sivm->sp);
+			break;
+		default:
+			if (reg > 0 && reg <= NREGS)
+				printf("R%d = %d\n", reg, sivm->reg[reg - 1]);
+			else
+				return false;
+			break;
+	}
+	return true;
+}
+
+/**Prints the given SIVM's memory value.
+ *@returns	true if the register is a legal one, false if no corresponding register was found (won't print diagnostic message in this case)
+ */
+bool sivm_print_memory(SIVM *sivm, unsigned int mem)
+{
+	if (mem >= MEMSIZE) return false;
+	printf("MEM[%d] = %d", mem, sivm->mem[mem].brut);
+	return true;
+}
+
 /**Prints the given SIVM's registers values.
+ *@see	sivm_print_register
  */
 void sivm_status(SIVM *sivm)
 {
-    printf("==> Status <==\n");
-	printf("\tPC = %d\n", sivm->pc);
-	printf("\tSR = %d\n", sivm->sr);
- 	printf("\tSP = %d\n", sivm->sp);
-    for (unsigned int i = 0; i < NREGS; ++i)
-        printf("\tREG[%d] = %d\n", i, sivm->reg[i]);
+	sivm_print_register(sivm, PC);
+	sivm_print_register(sivm, SR);
+	sivm_print_register(sivm, SP);
+    for (unsigned int i = 1; i <= NREGS; ++i)
+        printf("\tR%d = %d\n", i + 1, sivm->reg[i]);
 }
 
 /**Returns the given SIVM's current instruction.*/

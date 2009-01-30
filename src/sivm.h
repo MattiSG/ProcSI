@@ -40,6 +40,16 @@ typedef uint16_t REG;
 #define SP_INCR -1
 //@}
 
+/**@name	Status registers conventions
+ *Defines the numerical values for the SP, SR and PC registers used internally.
+ *<strong>WARNING</strong>: do not set these to anything between 0 and NREGS!
+ */
+//@{
+#define PC 100
+#define SP 101
+#define SR 102
+//@}
+
 
 /**@name	Command words definition
  *Defines the order of components in a command word, and the inner form of a command word too.
@@ -79,7 +89,11 @@ typedef struct {
 void sivm_new(SIVM *sivm);
 bool sivm_load(SIVM *sivm, int memsize, cmd_word mem[memsize]);
 bool sivm_step(SIVM *sivm);
+
 void sivm_status(SIVM *sivm);
+bool sivm_print_register(SIVM *sivm, unsigned int reg);
+bool sivm_print_memory(SIVM *sivm, unsigned int mem);
+
 
 char* sivm_get_instruction_string(SIVM *sivm);
 
