@@ -544,7 +544,10 @@ bool parse_pass_line(Parser* parser, char *line)
 
         // pop DEST
         else if(!strcmp(instr, "pop"))
+        {
             m[0].codage.codeop = POP;
+            m[0].codage.mode = REGREG;
+        }
 
         // mov DEST, SOURCE
         else if(!strcmp(instr, "mov"))
