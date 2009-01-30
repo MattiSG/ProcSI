@@ -131,13 +131,11 @@ mode pseudomode_to_mode(Parser *parser, PMode spmode, PMode dpmode)
         default:
             logm(0, "Mode can't be INDDIR / INDIND at %d:%d",
                  parser->row, parser->col);
-            exit(1);
         }
         break;
     case PM_IMM:
         logm(0, "Mode can't be IMMREG / IMMIMM / IMMDIR / IMMIND at %d:%d",
              parser->row, parser->col);
-        exit(1);
     case PM_DIR:
         switch(spmode)
         {
@@ -148,7 +146,6 @@ mode pseudomode_to_mode(Parser *parser, PMode spmode, PMode dpmode)
         default:
             logm(0, "Mode can't be DIRDIR / DIRIND at %d:%d",
                  parser->row, parser->col);
-            exit(1);
         }
         break;
     }
