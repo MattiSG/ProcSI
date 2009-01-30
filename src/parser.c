@@ -41,7 +41,7 @@ LblListElm *lbllist_add(LblListElm *head, REG ptr, char *str, size_t len)
     newhead->next = head;
     newhead->pointer = ptr;
     newhead->str = malloc(len + 1);
-    strcpy(newhead->str, str);
+    strncpy(newhead->str, str, len);
 
     return newhead;
 }
@@ -152,7 +152,6 @@ bool parse_number(Parser* parser, int* value, bool modifiable)
 {
     int base = 10;
 
-
     // should here be expecting a number (even a register number)
     if(!isdigit(*parser->cur))
     {
@@ -170,7 +169,8 @@ bool parse_number(Parser* parser, int* value, bool modifiable)
                 {
                     if(!strncmp(lbl->str, parser->cur, strlen(lbl->str)))
                     {
-                        exit(1);
+                        *value = lbl->pointer;
+                        return true;
                     }
                 }
             }
@@ -513,16 +513,16 @@ bool parse_pass_line(Parser* parser, char *line)
         // write instruction into the memory
         if(instrsize > 0)
         {
-            if(!checkModes(m[0]))
-            {
-                fprintf(stderr,
-                        "Unknown modes for instruction at line %d\n",
-                        parser->row);
-                // return false;
-            }
-            
             if(parser->mem)
             {
+                if(!checkModes(m[0]))
+                {
+                    fprintf(stderr,
+                            "Unknown modes for instruction at line %d\n",
+                            parser->row);
+                    // return false;
+                }
+                
                 // second pass
                 for(int i = 0; i < instrsize; i++)
                     parser->mem[parser->pc++].brut = m[i].brut;
@@ -563,8 +563,6 @@ bool parse_first_pass(Parser* parser)
             break;
         program = NULL;
         
-        printf("pass1: %s\n", line);
-
         char instr[256];
         
         parser->cur = line;
@@ -623,7 +621,6 @@ bool parse_second_pass(Parser* parser)
 
         parser->cur = line;
         parser->col = 1;
-        printf("pass2: %s\n", line);
         
         if (!parse_pass_line(parser, line))
         {
