@@ -356,26 +356,13 @@ bool parse_source(Parser* parser, cmd_word m[3], unsigned int *instrsize)
         m[0].codage.source = sreg;
     if(spmode == PM_IMM || spmode == PM_DIR)
         m[(*instrsize)++].brut = sdata;
+    
+    // guess the mode
+    m[0].codage.mode = pseudomode_to_mode(parser, spmode, PM_REG);
 
     for(; isblank(*parser->cur); parser->col++,parser->cur++)
     {}
-
-    switch(spmode)
-    {
-    case PM_REG:
-        m[0].codage.mode = REGISTER;
-        break;
-    case PM_IMM:
-        m[0].codage.mode = IMMEDIATE;
-        break;
-    case PM_DIR:
-        m[0].codage.mode = DIRECT;
-        break;
-    case PM_IND:
-        m[0].codage.mode = INDIRECT;
-        break;
-    }
-
+    
     return true;
 }
 
@@ -544,10 +531,7 @@ bool parse_pass_line(Parser* parser, char *line)
 
         // pop DEST
         else if(!strcmp(instr, "pop"))
-        {
             m[0].codage.codeop = POP;
-            m[0].codage.mode = REGREG;
-        }
 
         // mov DEST, SOURCE
         else if(!strcmp(instr, "mov"))
