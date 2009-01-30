@@ -1,6 +1,8 @@
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
 
+#include <stdbool.h>
+
 #include "sivm.h"
 #include "parser.h"
 
@@ -20,7 +22,7 @@ typedef struct
  * \fn    void debugger_new(Debugger *debug)
  * \brief Initialize a Debugger structure
  */
-void debugger_new(Debugger *debug, char *filename);
+void debugger_new(Debugger *debug, char *filename, bool isSource);
 
 /**
  * \fn    void debugger_start(Debugger *debug)

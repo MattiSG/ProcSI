@@ -85,18 +85,28 @@ void display_help()
         printf((ANSI_OUTPUT ? "  \e[33m%s\e[0m:\t%s\n" : "  %s:\t%s\n"), commands[i].name, commands[i].help);
 }
 
-void debugger_new(Debugger *debug, char *filename)
+void debugger_new(Debugger *debug, char *filename, bool isSource)
 {
     if (filename)
     {
-        debug->filename = (char*)malloc(strlen(filename));
+        debug->filename = (char*)malloc(strlen(filename)+1);
         strcpy(debug->filename, filename);
     }
 
     int memsize;
 	cmd_word *prg;
-    load_program(debug->filename, &prg, &memsize);
-    logm(LOG_STEP, "Parsing successful");
+    if (isSource)
+    {
+        if (!sivm_parse_file(&memsize, &prg, debug->filename))
+            logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
+        else
+            logm(LOG_STEP, "Parsing successful");
+    }
+    else
+    {
+        load_program(debug->filename, &prg, &memsize);
+        logm(LOG_STEP, "Loading successful");
+    }
 
     sivm_new(&debug->sivm);
 	debug->program = prg;
@@ -159,7 +169,7 @@ void debugger_start(Debugger *debug)
                 execute = false;
                 break;
             case RESTART:
-                debugger_new(debug, 0);
+                debugger_new(debug, 0, false);
                 end_found = false;
                 step_by_step = true;
                 execute = false;
