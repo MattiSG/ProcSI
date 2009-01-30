@@ -3,9 +3,15 @@
 
 #include "util.h"
 
-void quit(char *msg)
+void quit(char *format, ...)
 {
-    fprintf(stderr, "[error] %s\n", msg);
+    char errformat[256];
+    sprintf(errformat, "[error] %s\n", format);
+
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, errformat, args);
+    va_end(args);
     exit(1);
 }
 
@@ -25,10 +31,21 @@ bool readLine(char *str, size_t length)
     return ret == 1;
 }
 
-void logm(char *msg, char level)
+void logm(char level, char *format, ...)
 {
+    va_list args;
+    va_start(args, format);
+
 	if (level <= OUT_LOG_LEVEL)
-	    fprintf(stdout, "%s\n", msg);
+    {
+        vfprintf(stdout, format, args);
+        fprintf(stdout, "\n");
+    }
 	else if (level <= ERR_LOG_LEVEL)
-	    fprintf(stderr, "%s\n", msg);
+    {
+        vfprintf(stderr, format, args);
+        fprintf(stderr, "\n");
+    }
+
+    va_end(args);
 }

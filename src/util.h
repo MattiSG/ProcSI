@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <stdarg.h>
 
 /**@name	Logging levels
  *Defines the level of verbosity of the program.
@@ -16,9 +17,9 @@
 //@}
 
 /**Quit the programe with an error
- *@param	msg		the error message
+ *@param	format		the error message
  */
-void quit(char *msg);
+void quit(char *format, ...);
 
 /**Read a line from the standard input
  *@param	str		pointer to the string
@@ -28,11 +29,11 @@ void quit(char *msg);
 bool readLine(char *str, size_t length);
 
 /**Logs debugging messages.
- *@param	msg		the message to log
  *@param	level	the priority level of the message ; maximum priority is 0, and should be used for fatal errors only.
+ *@param	msg		the message to log
  *@see	ERR_LOG_LEVEL
  *@see	OUT_LOG_LEVEL
  */
-void logm(char* msg, char level);
+void logm(char level, char *format, ...);
 
 #endif /*UTIL_H*/

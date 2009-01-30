@@ -63,7 +63,7 @@ bool instr_sub(SIVM *sivm, REG *dest, const cmd_word source)
 bool instr_jmp(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	if (source.brut > MEMSIZE) {
-		logm("Jumping too far!", 0);
+		logm(0, "Jumping too far!");
 		return false;
 	}
 	sivm->pc = source.brut;
@@ -87,7 +87,7 @@ bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	int newSp = sivm->sp + SP_INCR;
 	if (newSp > MEMSIZE || newSp < 0) {
-		logm("Stack pointer after incrementation is illegal", 0);
+		logm(0, "Stack pointer after incrementation is illegal");
 		return false;
 	}
 	sivm->mem[newSp] = source;
@@ -102,7 +102,7 @@ bool instr_pop(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	int newSp = sivm->sp - SP_INCR;
 	if (newSp > MEMSIZE || newSp < 0) {
-		logm("Stack pointer inconsistency", 0);
+		logm(0, "Stack pointer inconsistency");
 		return false;
 	}
 	*dest = source.brut;
@@ -144,7 +144,7 @@ bool instr_ret(SIVM *sivm, REG *dest, const cmd_word source)
  */
 bool instr_halt(SIVM *sivm, REG *dest, const cmd_word source)
 {
-	logm("HALT instruction encountered.", 3);
+	logm(3, "HALT instruction encountered.");
     return false;
 }
 

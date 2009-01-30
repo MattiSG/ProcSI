@@ -47,7 +47,7 @@ bool getModes(cmd_word *w, mode *destMode, mode *sourceMode)
 			*sourceMode = REGISTER;
 			break;
 		default:
-			logm("Invalid adressing mode", 0);
+			logm(0, "Invalid adressing mode");
 			return false;
 	}
 	return true;
@@ -73,7 +73,7 @@ char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
 			else if (paramType == CMD_WORD_DEST_INDEX)
 				sprintf(buffer, "R%d", w.codage.dest);
 			else {
-				logm("Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)", 2);
+				logm(2, "Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)");
 				strcat(buffer, "R?");
 			}
 			break;
@@ -89,12 +89,12 @@ char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
 			else if (paramType == CMD_WORD_DEST_INDEX)
 				sprintf(buffer, "[R%d]", w.codage.dest);
 			else {
-				logm("Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)", 2);
+				logm(2, "Unable to determine parameter type\n(invalid paramType argument passed to appendParameter)");
 				strcat(buffer, "[R?]");
 			}
 			break;
 		default:
-			logm("Unable to determine parameter\n(invalid mode argument passed to appendParameter)", 2);
+			logm(2, "Unable to determine parameter\n(invalid mode argument passed to appendParameter)");
 			strcat(buffer, "??");
 			break;
 	}
@@ -116,7 +116,7 @@ bool disassembler_increment_reading_pointer(const int max, int *reader)
 		return true;
 	}
 	else {
-		logm("Disassembly could not finish properly because the program is not complete!\n\t(adressing mode asks for more words than given)", 2);
+		logm(2, "Disassembly could not finish properly because the program is not complete!\n\t(adressing mode asks for more words than given)");
 		return false;
 	}
 }
@@ -159,7 +159,7 @@ char* disassemble(int length, const cmd_word words[])
 						if (! disassembler_increment_reading_pointer(length, &i))
 							return strcat(buffer, "***end of program reached***");
 					} else { //normally impossible to encounter
-						logm("Disassembly encountered an incorrect adressing mode\n\t(adressing mode requiring 3 words for a command allowing 1 or less parameter)", 2);
+						logm(2, "Disassembly encountered an incorrect adressing mode\n\t(adressing mode requiring 3 words for a command allowing 1 or less parameter)");
 						return strcat(buffer, "***incorrect number of parameters***");
 					}
 					
@@ -198,7 +198,7 @@ char* disassemble(int length, const cmd_word words[])
 					break;
 									
 				default:
-					logm("Invalid adressing mode", 0);
+					logm(0, "Invalid adressing mode");
 					return false;
 			}
 			strcat(buffer, "\t");

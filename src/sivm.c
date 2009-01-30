@@ -17,14 +17,14 @@ void sivm_new(SIVM *sivm)
     sivm->sr = SR_START;
 	
 	if (SP_START + SP_INCR > MEMSIZE || SP_START + SP_INCR <= 0)
-		logm("Stack init and incrementation are not in the same way, VM will crash at first push.", 0);
+		logm(0, "Stack init and incrementation are not in the same way, VM will crash at first push.");
 	
     for (unsigned int i = 0; i < NREGS; i++)
         sivm->reg[i] = 0;
     for (unsigned int i = 0; i < MEMSIZE; i++)
         sivm->mem[i].brut = 0;
 	
-	logm("VM successfully initialized.", 2);
+	logm(2, "VM successfully initialized.");
 }
 
 /**Loads the given program in the given SIVM.
@@ -55,7 +55,7 @@ bool sivm_exec(SIVM *, cmd_word *);
 bool checkMemoryAccess(REG index)
 {
 	if (index > MEMSIZE) {
-		logm("Invalid memory access (too high!)", 0);
+		logm(0, "Invalid memory access (too high!)");
 		return false;
 	}
 	return true;
@@ -67,7 +67,7 @@ bool checkMemoryAccess(REG index)
 bool checkRegisterAccess(unsigned index)
 {
 	if (index >= NREGS) {
-		logm("Invalid register access (too high!)", 0);
+		logm(0, "Invalid register access (too high!)");
 		return false;
 	}
 	return true;
@@ -90,7 +90,7 @@ bool sivm_step(SIVM *sivm)
 
     /* stop the vm */
     if (m->codage.codeop == HALT) {
-		logm("HALT instruction encountered, stopping VM.", 3);
+		logm(3, "HALT instruction encountered, stopping VM.");
         return false;
 	}
 	
@@ -109,7 +109,7 @@ bool increment_PC(SIVM *sivm)
 		sivm->pc++;
 		return true;
 	}
-	logm("PC too high !", 0);
+	logm(0, "PC too high !");
 	return false;
 }
 
@@ -131,7 +131,7 @@ REG* getDestinationParameter(SIVM *sivm, cmd_word *word)
 			return &sivm->reg[word->codage.dest];
 			break;
 		case IMMEDIATE:
-			logm("Invalid adressing mode: destination parameter can't be an immediate value!", 0);
+			logm(0, "Invalid adressing mode: destination parameter can't be an immediate value!");
 			return NULL;
 			break;
 		case DIRECT:
@@ -144,7 +144,7 @@ REG* getDestinationParameter(SIVM *sivm, cmd_word *word)
 			return &(sivm->mem[sivm->reg[word->codage.dest]].brut);
 			break;
 		default:
-			logm("Invalid destination adressing mode", 0);
+			logm(0, "Invalid destination adressing mode");
 			return NULL;
 	}
 }
@@ -180,7 +180,7 @@ cmd_word getSourceParameter(SIVM *sivm, cmd_word *word)
 			return sivm->mem[sivm->reg[word->codage.source]];
 			break;
 		default:
-			logm("Invalid source adressing mode", 0);
+			logm(0, "Invalid source adressing mode");
 			return (cmd_word) {.codage = { HALT }}; //Don't test for this value to detect errors, because it might also be a valid integer value
 	}
 }
@@ -199,10 +199,10 @@ bool sivm_exec(SIVM *sivm, cmd_word *word)
 	REG *dest = getDestinationParameter(sivm, word);
 	
 	if (instr.function(sivm, dest, source)) {
-		logm("Instruction successful", 5);
+		logm(5, "Instruction successful");
 		return true;
 	} else {
-		logm("Instruction unsuccessful", 1);
+		logm(1, "Instruction unsuccessful");
 		return false;
 	}
 }

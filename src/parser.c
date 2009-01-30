@@ -158,6 +158,7 @@ bool sivm_parse_file(int* memsize, cmd_word *mem[], char *file)
 
     f = fopen(file, "r");
     if(f == NULL) {
+        logm(0, "Can't open file `%s'", file);
         perror("fopen");
         return false;
     }
@@ -244,8 +245,8 @@ bool parse_number(Parser* parser, int* value, bool modifiable)
         }
         else
         {
-            fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
-                    parser->row, parser->col, *parser->cur);
+            logm(0, "Unexpected token at %d:%d : `%c'",
+                 parser->row, parser->col, *parser->cur);
             return false;
         }
     }
@@ -319,8 +320,8 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
     // read the number
     if(!parse_number(parser, &n, !isregister))
     {
-        fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
-                parser->row, parser->col, *parser->cur);
+        logm(0, "Unexpected token at %d:%d : `%c'",
+             parser->row, parser->col, *parser->cur);
         return false;
     }
 
@@ -350,8 +351,8 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
 
         if(*parser->cur != ']')
         {
-            fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
-                    parser->row, parser->col, *parser->cur);
+            logm(0, "Unexpected token at %d:%d : `%c'",
+                 parser->row, parser->col, *parser->cur);
             return false;
         }
     }
@@ -374,15 +375,15 @@ bool parse_source(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     // assert there is at least one whitespace before
     if(!isblank(*parser->cur))
     {
-        fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
-                parser->row, parser->col, *parser->cur);
-        exit(1);
+        logm(0, "Unexpected token at %d:%d : `%c'",
+             parser->row, parser->col, *parser->cur);
+        return false;
     }
 
     // read the source
     if(!parse_attrib(parser, &spmode, &sdata, &sreg))
     {
-        fprintf(stderr, "parse_attrib returned false\n");
+        logm(0, "parse_attrib returned false");
         return false;
     }
     if(spmode == PM_REG || spmode == PM_IND)
@@ -431,15 +432,15 @@ bool parse_destsource(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     // assert there is at least one whitespace before
     if(!isblank(*parser->cur))
     {
-        fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
-                parser->row, parser->col, *parser->cur);
-        exit(1);
+        logm(0, "Unexpected token at %d:%d : `%c'",
+             parser->row, parser->col, *parser->cur);
+        return false;
     }
 
     // read the destination
     if(!parse_attrib(parser, &dpmode, &ddata, &dreg))
     {
-        fprintf(stderr, "parse_attrib return false\n");
+        logm(0, "parse_attrib return false");
         return false;
     }
     if(dpmode == PM_REG || dpmode == PM_IND)
@@ -455,9 +456,9 @@ bool parse_destsource(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     }
     else
     {
-        fprintf(stderr, "Unexpected token at %d:%d : `%c'\n",
-                parser->row, parser->col, *parser->cur);
-        exit(1);
+        logm(0, "Unexpected token at %d:%d : `%c'",
+             parser->row, parser->col, *parser->cur);
+        return false;
     }
 
     for(; isblank(*parser->cur); parser->col++,parser->cur++)
@@ -467,7 +468,7 @@ bool parse_destsource(Parser* parser, cmd_word m[3], unsigned int *instrsize)
     if(!parse_attrib(parser, &spmode, &sdata, &sreg))
     {
         return false;
-        fprintf(stderr, "parse_attrib return false\n");
+        logm(0, "parse_attrib return false");
     }
     if(spmode == PM_REG || spmode == PM_IND)
         m[0].codage.source = sreg;
@@ -597,12 +598,11 @@ bool parse_pass_line(Parser* parser, char *line)
         {
             if(parser->mem)
             {
-                if(!checkModes(m[0]))
+                if (getInstruction(m[0]).nargs > 0 && !checkModes(m[0]))
                 {
-                    fprintf(stderr,
-                            "Unknown modes for instruction at line %d\n",
-                            parser->row);
-                    // return false;
+                    logm(0, "Invalid mode for instruction at line %d",
+                         parser->row);
+                    return false;
                 }
                 
                 // second pass
@@ -658,7 +658,7 @@ bool parse_first_pass(Parser* parser)
             {
                parser->labels = lbllist_add(parser->labels, parser->pc, instr,
                                             len - 1);
-               // printf("added %s @ %.4X\n", instr, parser->pc);
+               // printf("added %s @ %.4X", instr, parser->pc);
             }
         }
 
@@ -666,7 +666,7 @@ bool parse_first_pass(Parser* parser)
         // addresse we are
         if(!parse_pass_line(parser, line))
         {
-            fprintf(stderr, "parse_pass_line returned false\n");
+            logm(0, "parse_pass_line returned false");
             return false;
         }
     }
@@ -706,7 +706,7 @@ bool parse_second_pass(Parser* parser)
         
         if (!parse_pass_line(parser, line))
         {
-            fprintf(stderr, "parse_pass_line returned false\n");
+            logm(0, "parse_pass_line returned false");
             return false;
         }
     }
@@ -722,13 +722,13 @@ bool sivm_parse(int* memsize, cmd_word *mem[], char *str)
     
     if(!parse_first_pass(&parser))
     {
-        fprintf(stderr, "parse_first_pass returned false\n");
+        logm(0, "parse_first_pass returned false");
         return false;
     }
     
     if(!parse_second_pass(&parser))
     {
-        fprintf(stderr, "parse_second_pass returned false\n");
+        logm(0, "parse_second_pass returned false");
         return false;
     }
 
