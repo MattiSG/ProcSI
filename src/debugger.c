@@ -9,12 +9,21 @@
 #include "util.h"
 #include "cmd_word.h"
 
+/**
+ * \struct Command
+ * \brief  Structure to reference a debugger command
+ */
 typedef struct
 {
     char *name;
     char *help;
 } Command;
 
+
+/**
+ * \enum   type_command
+ * \brief  Enumerate all commands
+ */
 typedef enum
 {
     RUN = 0,
@@ -28,8 +37,12 @@ typedef enum
     UNKNOWN
 } type_command;
 
-//const unsigned int NB_COMMANDS = 8;
-#define NB_COMMANDS 8
+#define NB_COMMANDS 8 /*!< number of commands */
+
+/**
+ * \brief Array of available commands
+ * \see   Command
+ */
 Command commands[NB_COMMANDS] = {
     [RUN]        = { "run", "run program without step by step" },
     [STEP]       = { "step", "make a step in the program" },
@@ -41,7 +54,13 @@ Command commands[NB_COMMANDS] = {
     [BREAKPOINT] = { "breakpoint", "put or delete a breakpoint" }
 };
 
-int parseCommand(char *cmd)
+/**
+ * \fn    int find_command(char *cmd)
+ * \brief find the command in the array of Command
+ * \see   Command
+ * \see   comands
+ */
+int find_command(char *cmd)
 {
     for (unsigned int i = 0; i < NB_COMMANDS; ++i)
         if (!strncmp(cmd, commands[i].name, strlen(commands[i].name)) && strlen(cmd) == strlen(commands[i].name))
@@ -50,7 +69,12 @@ int parseCommand(char *cmd)
     return UNKNOWN;
 }
 
-void displayHelp()
+/**
+ * \fn    void display_help()
+ * \brief display all available commands and their help
+ * \see   commands
+ */
+void display_help()
 {
     for (unsigned int i = 0; i < NB_COMMANDS; ++i)
         printf("  %s : %s\n", commands[i].name, commands[i].help);
@@ -121,7 +145,7 @@ void debugger_start(Debugger *debug)
         char *cmd = strtok(line, " ");
         //printf("token => %s\n", line);
 
-        switch (parseCommand(cmd))
+        switch (find_command(cmd))
         {
             case RUN:
                 step_by_step = false;
@@ -213,7 +237,7 @@ void debugger_start(Debugger *debug)
                 printf("Unknown command\n");
             case HELP:
                 execute = false;
-                displayHelp();
+                display_help();
                 break;
         }
 
