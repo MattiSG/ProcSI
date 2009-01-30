@@ -29,7 +29,6 @@ typedef enum
     RUN = 0,
     STEP,
     QUIT,
-    STATUS,
     RESTART,
     HELP,
     DISPLAY,
@@ -37,7 +36,7 @@ typedef enum
     UNKNOWN
 } type_command;
 
-#define NB_COMMANDS 8 /*!< number of commands */
+#define NB_COMMANDS 7 /*!< number of commands */
 
 /**
  * \brief Array of available commands
@@ -47,10 +46,9 @@ Command commands[NB_COMMANDS] = {
     [RUN]        = { "run", "run program without step by step" },
     [STEP]       = { "step", "make a step in the program" },
     [QUIT]       = { "quit", "close the debugger" },
-    [STATUS]     = { "status", "display registers" },
     [RESTART]    = { "reload", "reload the program" },
     [HELP]       = { "help", "display help" },
-    [DISPLAY]    = { "display", "display a variable or a mem" },
+    [DISPLAY]    = { "display", "display [(reg|mem) number]" },
     [BREAKPOINT] = { "breakpoint", "put or delete a breakpoint" }
 };
 
@@ -83,9 +81,6 @@ void display_help()
 void debugger_new(Debugger *debug)
 {
     char filename[LINE_MAX];
-
-    sivm_new(&debug->sivm);
-
     /*
     printf("Quel fichier voulez-vous utiliser ? ");
     fflush(stdout);
@@ -95,17 +90,14 @@ void debugger_new(Debugger *debug)
     */
     strcpy(filename, "examples/test.procsi");
 
-
 	cmd_word *prg;
     int memsize;
     if(!sivm_parse_file(&memsize, &prg, filename))
-    {
-        quit("Can't load / assemble file");
-    }
-    //printf("%d %d %d %d\n", prg[0].codage.codeop, prg[0].codage.mode, prg[0].codage.source, prg[0].codage.dest);
-    //printf("taille => %d\n", memsize);
- 
- 
+        logm(0, "Can't load / assemble file");
+    else
+        logm(5, "W00t => pargin ok");
+
+    sivm_new(&debug->sivm);
 
 /*	
     cmd_word prg[] = {
@@ -122,10 +114,13 @@ void debugger_new(Debugger *debug)
     };
     int memsize = sizeof(prg) / sizeof(cmd_word);
 */	
+
     printf("Loaded program:\n%s", disassemble(memsize, prg));
     sivm_load(&debug->sivm, memsize, prg);
 }
 
+#include <readline/readline.h>
+#include <readline/history.h>
 void debugger_start(Debugger *debug)
 {
     breakpoints_list breakpoints;
@@ -137,11 +132,12 @@ void debugger_start(Debugger *debug)
     bool finish = false;
     do
     {
-        printf("$ ");
-        fflush(stdout);
+        //printf("$ ");
+        //fflush(stdout);
+        //char line[LINE_MAX];
+        //readLine(line, LINE_MAX);
 
-        char line[LINE_MAX];
-        readLine(line, LINE_MAX);
+        char *line = readline ("$ ");
         char *cmd = strtok(line, " ");
 
         switch (find_command(cmd))
@@ -153,10 +149,6 @@ void debugger_start(Debugger *debug)
             case STEP:
                 step_by_step = true;
                 execute = true;
-                break;
-            case STATUS:
-                execute = false;
-                sivm_status(&debug->sivm);
                 break;
             case QUIT:
                 finish = true;
@@ -174,13 +166,13 @@ void debugger_start(Debugger *debug)
                     char *type = strtok(0, " ");
                     if (!type || strlen(type) != 3)
                     {
-                        printf("Usage: display (reg|mem) number\n");
+                        sivm_status(&debug->sivm);
                         break;
                     }
                     char *num = strtok(0, " ");
                     if (!num || !isdigit(num[0]))
                     {
-                        printf("Usage: display (reg|mem) number\n");
+                        printf("Usage: %s\n", commands[DISPLAY].help);
                         break;
                     }
                     unsigned int nb = atoi(num);
@@ -190,7 +182,7 @@ void debugger_start(Debugger *debug)
                     else if (!strcmp(type, "mem"))
                         printf("=> memory %d: %d\n", nb, *(&debug->sivm.mem[nb].brut));
                     else
-                        printf("Usage: display (reg|mem) number\n");
+                        printf("Usage: %s\n", commands[DISPLAY].help);
                 }
                 break;
             case BREAKPOINT:
@@ -199,15 +191,20 @@ void debugger_start(Debugger *debug)
                     char *type = strtok(0, " ");
                     if (!type)
                     {
-                        printf("breakpoints:\n");
-                        breakpoint_list_display(&breakpoints);
+                        if (breakpoints.size)
+                        {
+                            printf("breakpoints:\n");
+                            breakpoint_list_display(&breakpoints);
+                        }
+                        else
+                            printf("no breakpoint");
                     }
                     else if (!strcmp(type, "add"))
                     {
                         char *num = strtok(0, " ");
                         if (!num || !isdigit(num[0]))
                         {
-                            printf("Usage: breakpoint\nUsage: breakpoint add line\nUsage: breakpoint rm num\n");
+                            printf("Usage: %s\n", commands[BREAKPOINT].help);
                             break;
                         }
                         unsigned int nb = atoi(num);
@@ -221,7 +218,7 @@ void debugger_start(Debugger *debug)
                         char *num = strtok(0, " ");
                         if (!num || !isdigit(num[0]))
                         {
-                            printf("Usage: breakpoint\nUsage: breakpoint add line\nUsage: breakpoint rm num\n");
+                            printf("Usage: %s\n", commands[BREAKPOINT].help);
                             break;
                         }
                         unsigned int nb = atoi(num);
@@ -229,7 +226,7 @@ void debugger_start(Debugger *debug)
                             printf("no breakpoint\n");
                     }
                     else
-                        printf("Usage: breakpoint\nUsage: breakpoint add line\nUsage: breakpoint rm num\n");
+                        printf("Usage: %s\n", commands[BREAKPOINT].help);
                 }
                 break;
             case UNKNOWN:
@@ -239,6 +236,7 @@ void debugger_start(Debugger *debug)
                 display_help();
                 break;
         }
+        add_history(line);
 
         while (execute)
         {
