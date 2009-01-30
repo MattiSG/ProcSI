@@ -120,8 +120,9 @@ bool instr_call(SIVM *sivm, REG *dest, const cmd_word source)
 		return false;
 	
 	for (int i = 0; i < NREGS; i++)
-		if (! instr_push(sivm, dest, (cmd_word) sivm->reg[i]))
-			return false;
+		if (i < PARAM_REGS_START || i >= PARAM_REGS_END) //ignore reserved registers
+			if (! instr_push(sivm, dest, (cmd_word) sivm->reg[i]))
+				return false;
 	
 	return instr_jmp(sivm, dest, source);
 }
@@ -133,8 +134,9 @@ bool instr_call(SIVM *sivm, REG *dest, const cmd_word source)
 bool instr_ret(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	for (int i = NREGS - 1; i >= 0; i--)
-		if (! instr_pop(sivm, &sivm->reg[i], source))
-			return false;
+		if (i < PARAM_REGS_START || i >= PARAM_REGS_END) //ignore reserved registers
+			if (! instr_pop(sivm, &sivm->reg[i], source))
+				return false;
 	
 	return instr_pop(sivm, &sivm->pc, source);
 }
@@ -171,7 +173,7 @@ Instr instructions[] = {
 	[JEQ]	= {instr_jeq,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
 			
 	[PUSH]	= {instr_push,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"PUSH"},
-	[POP]	= {instr_pop,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"POP"},
+	[POP]	= {instr_pop,	1,	FM_REGREG,	"POP"},
 			
 	[CALL]	= {instr_call,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"CALL"},
 	[RET]	= {instr_ret,	0,	0x0,	"RET"},

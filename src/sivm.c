@@ -17,7 +17,10 @@ void sivm_new(SIVM *sivm)
     sivm->sr = SR_START;
 	
 	if (SP_START + SP_INCR > MEMSIZE || SP_START + SP_INCR <= 0)
-		logm(0, "Stack init and incrementation are not in the same way, VM will crash at first push.");
+		logm(1, "Stack init and incrementation are not in the same way, VM will crash at first PUSH.");
+	
+	if (PARAM_REGS_END > NREGS || PARAM_REGS_START > NREGS || PARAM_REGS_END < PARAM_REGS_START)
+		logm(1, "Reserved argument registers have illegal values, VM will crash at first CALL or RET.");
 	
     for (unsigned int i = 0; i < NREGS; i++)
         sivm->reg[i] = 0;
@@ -55,7 +58,7 @@ bool sivm_exec(SIVM *, cmd_word *);
 bool checkMemoryAccess(REG index)
 {
 	if (index > MEMSIZE) {
-		logm(0, "Invalid memory access (too high!)");
+		logm(0, "Invalid memory access: ", index);
 		return false;
 	}
 	return true;
@@ -67,7 +70,7 @@ bool checkMemoryAccess(REG index)
 bool checkRegisterAccess(unsigned index)
 {
 	if (index >= NREGS) {
-		logm(0, "Invalid register access (too high!)");
+		logm(0, "Invalid register access: ", index);
 		return false;
 	}
 	return true;

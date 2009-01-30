@@ -13,6 +13,18 @@ typedef uint16_t REG;
 //@{
 /**Number of registers in an SIVM.*/
 #define NREGS 8
+/**First register to be reserved for return values.
+ *The registers in this reserved range won't be updated by a call to RET, and not saved by a call to CALL.
+ *<strong>NOTE</strong>: the value is a register number, not an index (ie. starts at 1, not 0)
+ *@see	PARAM_REGS_END
+ */
+#define PARAM_REGS_START 1
+/**Last register to be reserved for return values.
+ *The registers in this reserved range won't be updated by a call to RET, and not saved by a call to CALL.
+ *<strong>NOTE</strong>: the value is a register number, not an index (ie. starts at 1, not 0)
+ *@see	PARAM_REGS_START
+ */
+#define PARAM_REGS_END 4
 /**Size of an SIVM's memory*/
 #define MEMSIZE 128
 /**PC index at SIVM startup*/

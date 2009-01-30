@@ -50,8 +50,8 @@ typedef enum
 } mode;
 
 /**Shifted adressing modes.
- *TODO: move to the implementation file
- *TODO: explain clearly why this is done
+ *Using this technique, we can have unique combinations of adressing modes to describe which ones are allowed for each instruction.
+ *We also avoid having any adressing mode with code 0x0, that is therefore reserved for instructions with arity 0.
  */
 typedef enum
 {
