@@ -1,10 +1,10 @@
 
 ; lol
+push #2
+pop R0
 add R3, #1329
-sub R4, #8
-add R3, [R4]
-add R4, [12]
-mov R0, R1
+add R4, #8
+add R3, R4
 
 boucle:
     jmp boucle

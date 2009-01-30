@@ -32,7 +32,7 @@ typedef uint16_t REG;
 /**SR index at SIVM startup*/
 #define SR_START 0
 /**SP index at SIVM startup*/
-#define SP_START MEMSIZE
+#define SP_START MEMSIZE-1
 /**SP incrementation
  *Set it to (+)1 to go through ascending adresses, -1 to go through descending adresses.
  *Standard operation is found by setting SP_START at MEMSIZE and this variable to -1 (descending adresses).
@@ -94,6 +94,8 @@ void sivm_status(SIVM *sivm);
 bool sivm_print_register(SIVM *sivm, unsigned int reg);
 bool sivm_print_memory(SIVM *sivm, unsigned int mem);
 
+bool checkMemoryAccess(REG index);
+bool checkRegisterAccess(unsigned index);
 
 char* sivm_get_instruction_string(SIVM *sivm);
 

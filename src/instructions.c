@@ -145,11 +145,9 @@ bool instr_jeq(SIVM *sivm, REG *dest, const cmd_word source)
 bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	int newSp = sivm->sp + SP_INCR;
-	if (newSp > MEMSIZE || newSp < 0) {
-		logm(0, "Stack pointer after incrementation is illegal");
-		return false;
-	}
-	sivm->mem[newSp] = source;
+	checkMemoryAccess(sivm->sp);
+	checkMemoryAccess(newSp);
+	sivm->mem[sivm->sp] = source;
 	sivm->sp = newSp;
 	return true;
 }
@@ -160,11 +158,8 @@ bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
 bool instr_pop(SIVM *sivm, REG *dest, const cmd_word source)
 {
 	int newSp = sivm->sp - SP_INCR;
-	if (newSp > MEMSIZE || newSp < 0) {
-		logm(0, "Stack pointer inconsistency");
-		return false;
-	}
-	*dest = source.brut;
+	checkMemoryAccess(newSp);
+	*dest = sivm->mem[newSp].brut;
 	sivm->sp = newSp;
 	return true;
 }

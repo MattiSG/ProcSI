@@ -224,10 +224,10 @@ bool sivm_print_register(SIVM *sivm, unsigned int reg)
 			printf((ANSI_OUTPUT ? "\e[36mPC\e\[0m = %d\n" : "PC = %d\n"), sivm->pc);
 			break;
 		case SR:
-			printf((ANSI_OUTPUT ? "\e[36mSR\e\[0m = %d\n" : "SR = %d\n"), sivm->pc);
+			printf((ANSI_OUTPUT ? "\e[36mSR\e\[0m = %d\n" : "SR = %d\n"), sivm->sr);
 			break;
 		case SP:
-			printf((ANSI_OUTPUT ? "\e[36mSP\e\[0m = %d\n" : "SP = %d\n"), sivm->pc);
+			printf((ANSI_OUTPUT ? "\e[36mSP\e\[0m = %d\n" : "SP = %d\n"), sivm->sp);
 			break;
 		default:
 			if (reg > 0 && reg <= NREGS)
