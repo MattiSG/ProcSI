@@ -12,8 +12,15 @@ endif(DOXYGEN_FOUND)
 
 file(GLOB_RECURSE src_files src/*)
 
-message(STATUS ${src_files})
-
 add_executable(main ${src_files})
 
 add_custom_target(run ${EXECUTABLE_OUTPUT_PATH}/main)
+
+#enable_testing()
+#include_directories(src/)
+#set(TEST_DIR test)
+#set(TEST_FILES breakpoint)
+#foreach(filename ${TEST_FILES})
+#    add_executable(test_${filename} ${TEST_DIR}/test_${filename}.c)
+#    add_test(${filename} ${EXECUTABLE_OUTPUT_PATH}/test_${filename})
+#endforeach(filename)
