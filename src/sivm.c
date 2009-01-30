@@ -96,10 +96,7 @@ bool sivm_step(SIVM *sivm)
 	
     if (! sivm_exec(sivm, m)) return false;
 
-	if (! increment_PC(sivm))
-		quit("sivm_step:\nPC too high !");
-	
-	return true;
+	return increment_PC(sivm);
 }
 
 /**Handles PC incrementation for an SIVM.
@@ -108,7 +105,6 @@ bool sivm_step(SIVM *sivm)
  */
 bool increment_PC(SIVM *sivm)
 {
-	
 	if (checkMemoryAccess(sivm->pc)) {
 		sivm->pc++;
 		return true;
