@@ -69,6 +69,7 @@ typedef enum
 
 typedef struct {
     bool (*function)(SIVM *sivm, REG *dest, const cmd_word source);
+	int nargs;
     f_mode modes;
 	char* name;
 } Instr;

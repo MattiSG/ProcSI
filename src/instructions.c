@@ -23,6 +23,16 @@ bool instr_store(SIVM *sivm, REG *dest, const cmd_word source)
     return true;
 }
 
+/**Emulates the MOV command in the given SIVM.
+ *@return	true if the command was successful.
+ */
+bool instr_mov(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	*dest = source.brut;
+	sivm->sr = *dest;
+    return true;
+}
+
 /**Emulates the ADD command in the given SIVM.
  *@return	true if the command was successful.
  */
@@ -100,25 +110,33 @@ bool instr_pop(SIVM *sivm, REG *dest, const cmd_word source)
 	return true;
 }
 
-///**Emulates the CALL command in the given SIVM.
-// *@see	instr_jmp
-// */
-//bool instr_call(SIVM *sivm, REG *dest, const mot source)
-//{
-//	while (<#condition#>) {
-//		<#statements#>
-//	}
-//	return instr_jmp(sivm, dest, source);
-//}
-
-/**Emulates the MOV command in the given SIVM.
- *@return	true if the command was successful.
+/**Emulates the CALL command in the given SIVM.
+ *@see	instr_push
+ *@see	instr_jmp
  */
-bool instr_mov(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_call(SIVM *sivm, REG *dest, const cmd_word source)
 {
-	*dest = source.brut;
-	sivm->sr = *dest;
-    return true;
+	if (! instr_push(sivm, dest, (cmd_word) sivm->pc))
+		return false;
+	
+	for (int i = 0; i < NREGS; i++)
+		if (! instr_push(sivm, dest, (cmd_word) sivm->reg[i]))
+			return false;
+	
+	return instr_jmp(sivm, dest, source);
+}
+
+/**Emulates the RET command in the given SIVM.
+ *@see	instr_pop
+ *@see	instr_jmp
+ */
+bool instr_ret(SIVM *sivm, REG *dest, const cmd_word source)
+{
+	for (int i = NREGS - 1; i >= 0; i--)
+		if (! instr_pop(sivm, &sivm->reg[i], source))
+			return false;
+	
+	return instr_pop(sivm, &sivm->pc, source);
 }
 
 /**Emulates the HALT command in the given SIVM.
@@ -142,14 +160,23 @@ bool instr_halt(SIVM *sivm, REG *dest, const cmd_word source)
  *@see	getInstruction
  */
 Instr instructions[] = {
-	[LOAD] = {instr_load,	FM_REGDIR | FM_REGIMM | FM_REGIND,				"LOAD"},
-	[STORE] = {instr_store,	FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"STORE"},
-	[ADD] = {instr_add,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"ADD"},
-	[SUB] = {instr_sub,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SUB"},
-	[JMP] = {instr_jmp,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JMP"},
-	[JEQ] = {instr_jeq,		FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
-	[MOV] = {instr_mov,		FM_REGREG | FM_REGIMM,							"MOV"},
-	[HALT] = {instr_halt,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND | FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"HALT"},
+	[LOAD]	= {instr_load,	2,	FM_REGDIR | FM_REGIMM | FM_REGIND,				"LOAD"},
+	[STORE]	= {instr_store,	2,	FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"STORE"},
+	[MOV]	= {instr_mov,	2,	FM_REGREG | FM_REGIMM,							"MOV"},
+			
+	[ADD]	= {instr_add,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"ADD"},
+	[SUB]	= {instr_sub,	2,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"SUB"},
+			
+	[JMP]	= {instr_jmp,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JMP"},
+	[JEQ]	= {instr_jeq,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"JEQ"},
+			
+	[PUSH]	= {instr_push,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"PUSH"},
+	[POP]	= {instr_pop,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"POP"},
+			
+	[CALL]	= {instr_call,	1,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"CALL"},
+	[RET]	= {instr_ret,	0,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND,	"RET"},
+
+	[HALT]	= {instr_halt,	0,	FM_REGREG | FM_REGIMM | FM_REGDIR | FM_REGIND | FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"HALT"},
 };
 
 //@}

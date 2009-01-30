@@ -198,7 +198,6 @@ bool sivm_exec(SIVM *sivm, cmd_word *word)
 	cmd_word source = getSourceParameter(sivm, word);
 	REG *dest = getDestinationParameter(sivm, word);
 	
-	logm(instr.name, 5);
 	if (instr.function(sivm, dest, source)) {
 		logm("Instruction successful", 5);
 		return true;
