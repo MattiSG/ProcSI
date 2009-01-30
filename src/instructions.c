@@ -78,7 +78,7 @@ bool instr_or(SIVM *sivm, REG *dest, const cmd_word source)
  */
 bool instr_dec(SIVM *sivm, REG *dest, const cmd_word source)
 {
-	*dest--;
+	--(*dest);
 	sivm->sr = *dest;
     return true;
 }
