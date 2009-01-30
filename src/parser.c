@@ -512,51 +512,51 @@ bool parse_pass_line(Parser* parser, char *line)
         parser->cur += len;
         parser->col += len;
 
-        // load SOURCE, DEST
         if(!strcmp(instr, "load"))
             m[0].codage.codeop = LOAD;
 
-        // store SOURCE, DEST
         else if(!strcmp(instr, "store"))
             m[0].codage.codeop = STORE;
 
-        // add SOURCE, DEST
         else if(!strcmp(instr, "add"))
             m[0].codage.codeop = ADD;
 
-        // sub SOURCE, DEST
         else if(!strcmp(instr, "sub"))
             m[0].codage.codeop = SUB;
 
-        // jmp SOURCE
+        else if(!strcmp(instr, "and"))
+            m[0].codage.codeop = AND;
+
+        else if(!strcmp(instr, "or"))
+            m[0].codage.codeop = OR;
+
+        else if(!strcmp(instr, "shl"))
+            m[0].codage.codeop = SHL;
+
+        else if(!strcmp(instr, "shr"))
+            m[0].codage.codeop = SHR;
+
         else if(!strcmp(instr, "jmp"))
             m[0].codage.codeop = JMP;
 
-        // jeq SOURCE
         else if(!strcmp(instr, "jeq"))
             m[0].codage.codeop = JEQ;
 
-        // call SOURCE
         else if(!strcmp(instr, "call"))
             m[0].codage.codeop = CALL;
 
-        // ret
         else if(!strcmp(instr, "ret"))
             m[0].codage.codeop = RET;
 
-        // push SOURCE
         else if(!strcmp(instr, "push"))
             m[0].codage.codeop = PUSH;
 
-        // pop DEST
         else if(!strcmp(instr, "pop"))
             m[0].codage.codeop = POP;
 
-        // mov DEST, SOURCE
         else if(!strcmp(instr, "mov"))
             m[0].codage.codeop = MOV;
         
-        // halt
         else if(!strcmp(instr, "halt"))
             m[0].codage.codeop = HALT;
 

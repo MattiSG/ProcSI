@@ -1,0 +1,9 @@
+call #mafonction
+call #mafonction
+call #mafonction
+call #mafonction
+halt
+
+mafonction:
+    add R0, #1
+    ret
