@@ -258,7 +258,7 @@ void sivm_status(SIVM *sivm)
 	sivm_print_register(sivm, SR);
 	sivm_print_register(sivm, SP);
     for (unsigned int i = 1; i <= NREGS; ++i)
-        printf("\tR%d = %d\n", i + 1, sivm->reg[i]);
+      	sivm_print_register(sivm, i);
 }
 
 /**Returns the given SIVM's current instruction.*/
