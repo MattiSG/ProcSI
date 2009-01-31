@@ -47,7 +47,7 @@ typedef enum
  * @brief Array of available commands
  * @see   Command
  */
-Command commands[NB_COMMANDS] = {
+const Command commands[NB_COMMANDS] = {
     [RUN]        = { "run", "run the program all at once" },
     [STEP]       = { "step", "execute one instruction in the program" },
     [PROGRAM]    = { "program", "display the disassembled program currently loaded in the VM" },

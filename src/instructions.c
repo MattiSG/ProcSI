@@ -216,7 +216,7 @@ bool instr_halt(SIVM *sivm, REG *dest, cmd_word source)
  *@see	instructions.h#enum f_modes
  *@see	getInstruction
  */
-Instr instructions[] = {
+const Instr instructions[] = {
 	[LOAD]	= {instr_load,	true,	true,	FM_REGDIR | FM_REGIMM | FM_REGIND,				"LOAD"},
 	[STORE]	= {instr_store,	true,	true,	FM_DIRIMM | FM_DIRREG | FM_INDIMM | FM_INDREG,	"STORE"},
 	[MOV]	= {instr_mov,	true,	true,	FM_REGREG | FM_REGIMM,							"MOV"},

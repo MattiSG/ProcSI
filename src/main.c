@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
     else if (argc == 4 && (!strncmp("--compile", argv[1], 9) || !strncmp("-c", argv[1], 2)))
     {
         ParserResult presult;
-
         if (!sivm_parse_file(&presult, argv[3]))
             logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
         save_program(argv[2], presult.mem, presult.memsize);
