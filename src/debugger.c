@@ -290,14 +290,13 @@ void debugger_start(Debugger *debug)
 
         while (execute)
         {
-			
-			logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
             if (end_found)
             {
-                logm(LOG_STEP, "End of program reached\n");
+                logm(LOG_STEP, "End of program reached");
                 break;
             }
 
+			logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
             end_found = !sivm_step(&debug->sivm);
 
             if (step_by_step || breakpoint_list_has(&breakpoints, debug->sivm.pc)) break;

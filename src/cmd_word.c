@@ -67,6 +67,7 @@ char* appendParameter(char *string, const cmd_word w, mode m, int paramType)
 {
 	char *color = "";
 	char buffer[2 * MAX_INSTR_PRINT_SIZE * sizeof(char)];
+    buffer[0] = '\0';
 	
 	switch (m) {
 		case REGISTER:

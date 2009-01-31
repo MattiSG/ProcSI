@@ -285,6 +285,7 @@ char* sivm_get_instruction_string(SIVM *sivm)
 		words[i] = sivm->mem[sivm->pc + i];
 	}
 	char *result = malloc(MAX_INSTR_PRINT_SIZE * sizeof(char));
+    result[0] = '\0';
 	disassemble_single_instruction(result, words);
 	return result;
 }
