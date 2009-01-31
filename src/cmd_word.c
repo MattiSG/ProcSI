@@ -6,7 +6,7 @@
 
 
 /**Computes the destination and source adressing modes from a command word.
- *@param	word	the command word from which to compute adressing modes
+ *@param	w			the command word from which to compute adressing modes
  *@param	sourceMode	pointer to the source mode variable to set
  *@param	destMode	pointer to the destination mode variable to set
  *@return	false if the given modes are illegal

@@ -116,6 +116,8 @@ bool instr_cmp(SIVM *sivm, REG *dest, const cmd_word source)
  *This instruction takes only one parameter above the targeted SIVM, source, but keeps the dest argument for type compatibility.
  *<strong>WARNING</strong> the argument to use is <strong>source</strong> and not dest.
  *Argument validity will be checked.
+ *@param    sivm    pointer to the virtual machine
+ *@param    dest    destination register
  *@param	source	the adress at which the PC register of the given SIVM should be put at.
  *@return	true if the command was successful, false if the PC argument is out of memory bounds.
  */

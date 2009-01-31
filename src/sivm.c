@@ -123,7 +123,6 @@ bool increment_PC(SIVM *sivm)
  *<strong>WARNING</strong>: updates PC if necessary
  *@param	sivm	the VM in which to get the parameters
  *@param	word	the command word from which to compute parameters
- *@param	dest	pointer to the pointer to the destination parameter
  *@return	a pointer to the destination operand, possibly null if the mode encoded in the given word is illegal
  */
 REG* getDestinationParameter(SIVM *sivm, cmd_word *word)
@@ -159,7 +158,6 @@ REG* getDestinationParameter(SIVM *sivm, cmd_word *word)
  *<strong>WARNING</strong>: updates PC if necessary
  *@param	sivm	the VM in which to get the parameters
  *@param	word	the command word from which to compute parameters
- *@param	source	pointer to the source parameter
  *@return	the value of the source operand
  */
 cmd_word getSourceParameter(SIVM *sivm, cmd_word *word)

@@ -41,7 +41,7 @@ bool readLine(char *str, size_t length);
 
 /**Logs debugging messages.
  *@param	level	the priority level of the message ; maximum priority is 0, and should be used for fatal errors only.
- *@param	msg		the message to log
+ *@param	format	format of the message to log
  *@see	ERR_LOG_LEVEL
  *@see	OUT_LOG_LEVEL
  */

@@ -22,12 +22,14 @@
 
 int main(int argc, char *argv[])
 {
+    // execute binary file
     if (argc == 2 && argv[1][0] != '-')
     {
         Debugger debug;
         debugger_new(&debug, argv[1], false);
         debugger_start(&debug);
     }
+    // compile the source file in binary file
     else if (argc == 4 && (!strncmp("--compile", argv[1], 9) || !strncmp("-c", argv[1], 2)))
     {
         ParserResult presult;
@@ -36,6 +38,7 @@ int main(int argc, char *argv[])
             logm(LOG_FATAL_ERROR, "Unable to load / assemble file");
         save_program(argv[2], presult.mem, presult.memsize);
     }
+    // execute source file
     else if (argc == 3 && (!strncmp("--source", argv[1], 8) || !strncmp("-s", argv[1], 2)))
     {
         Debugger debug;

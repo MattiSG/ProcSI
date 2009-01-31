@@ -12,8 +12,8 @@
 #include "cmd_word.h"
 
 /**
- * \struct Command
- * \brief  Structure to reference a debugger command
+ * @struct Command
+ * @brief  Structure to reference a debugger command
  */
 typedef struct
 {
@@ -23,8 +23,8 @@ typedef struct
 
 
 /**
- * \enum   type_command
- * \brief  Enumerate all commands
+ * @enum   type_command
+ * @brief  Enumerate all commands
  */
 typedef enum
 {
@@ -43,8 +43,8 @@ typedef enum
 #define NB_COMMANDS 9 /*!< number of commands */
 
 /**
- * \brief Array of available commands
- * \see   Command
+ * @brief Array of available commands
+ * @see   Command
  */
 Command commands[NB_COMMANDS] = {
     [RUN]        = { "run", "run the program all at once" },
@@ -60,10 +60,9 @@ Command commands[NB_COMMANDS] = {
 };
 
 /**
- * \fn    int find_command(char *cmd)
- * \brief find the command in the array of Command
- * \see   Command
- * \see   comands
+ * @brief find the command in the array of Command
+ * @see   Command
+ * @see   comands
  */
 int find_command(char *cmd)
 {
@@ -75,9 +74,8 @@ int find_command(char *cmd)
 }
 
 /**
- * \fn    void display_help()
- * \brief display all available commands and their help
- * \see   commands
+ * @brief display all available commands and their help
+ * @see   commands
  */
 void display_help()
 {
@@ -125,9 +123,7 @@ void debugger_new(Debugger *debug, char *filename, bool isSource)
     };
     int memsize = sizeof(prg) / sizeof(cmd_word);
 */	
-	//if (ANSI_OUTPUT) printf("\e[32m");
-    printf("Program loaded\n");
-	//if (ANSI_OUTPUT) printf("\e[0m");
+    logm(LOG_STEP, "Program loaded");
     sivm_load(&debug->sivm, debug->presult.memsize, debug->presult.mem);
 }
 
