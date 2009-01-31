@@ -41,7 +41,7 @@ typedef enum
     UNKNOWN
 } type_command;
 
-#define NB_COMMANDS 10 /*!< number of commands */
+#define NB_COMMANDS 11 /*!< number of commands */
 
 /**
  * @brief Array of available commands
@@ -55,8 +55,7 @@ Command commands[NB_COMMANDS] = {
     [INSTR]      = { "instr", "display current instruction for the VM (the next to be executed in step-by-step mode)" },
     [RESTART]    = { "reload", "reload the program (updates from the file)" },
     [DISPLAY]    = { "display", "display a register or memory unit value, or the whole VM status\n\tUsage: display [(reg number|PC|SP|SR) | (mem number)]" },
-    [HELP]       = { "help", "display help" },
-    [BREAKPOINT] = { "breakpoint", "add or remove a breakpoint" },
+    [BREAKPOINT] = { "breakpoint", "add or remove a breakpoint\n\tUsage: breakpoint (add|rm) PC_INDEX\n\tYou'll notice that the index is the PC, not a line number (in order to have consistency between source and disassembled files). Please refer to the PCs given by the \"program\" command." },
     [HELP]       = { "help", "display help" },
     [QUIT]       = { "quit", "close the debugger" }
 };
@@ -230,6 +229,7 @@ void debugger_start(Debugger *debug)
                     else
 						printf("Usage: %s\n", commands[DISPLAY].help);
                 }
+				break;
             case BREAKPOINT:
                 {
                     execute = false;
