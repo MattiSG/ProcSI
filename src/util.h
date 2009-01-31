@@ -27,9 +27,9 @@
 /**Level of message from which error is considered as fatal (exits)*/
 #define FATAL_LEVEL 0
 /**Maximum level of messages to be displayed to stderr*/
-#define ERR_LOG_LEVEL 5
+#define ERR_LOG_LEVEL LOG_INFO
 /**Maximum level of messages to be displayed to stdout*/
-#define OUT_LOG_LEVEL 5
+#define OUT_LOG_LEVEL LOG_INFO
 //@}
 
 /**Read a line from the standard input
