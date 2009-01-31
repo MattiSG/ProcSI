@@ -1,0 +1,8 @@
+mov R0, #3
+push R0
+push R1
+push R0
+pop R2
+pop R3
+pop R4
+halt
