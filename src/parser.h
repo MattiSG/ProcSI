@@ -68,7 +68,18 @@ typedef struct
  */
 bool sivm_parse_file(ParserResult *presult, char *file);
 
+/**Save the program into a file in a binary format
+ *@param    filename file output
+ *@param    mem      program
+ *@param    memsize  size of the program
+ */
 void save_program(char *filename, cmd_word mem[], int memsize);
+
+/**Load a program into the memory from a binary file
+ *@param    filename file input
+ *@param    mem      pointer to the program
+ *@param    memsize  size of the program
+ */
 void load_program(char *filename, cmd_word *mem[], int *memsize);
 
 #endif /* PARSER_H */
