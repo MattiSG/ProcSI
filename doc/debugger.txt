@@ -18,3 +18,9 @@ C'est lui-même qui va s'occuper de la communication entre l'utilisateur et la m
 Le fichier source :
 Voici les différentes opérations que vous pouvez utiliser dans vos fichiers sources : LOAD, STORE, ADD, SUB, JMP, JEQ, CALL, RET, PUSH, POP, MOV, AND, OR, SHL, SHR, HALT.
 Vous pouvez aussi utiliser des labels pour paramétrer les sauts sans avoir à écrire l'adresse exacte.
+
+
+Les opérandes sont colorées en fonction de leur type (registre, mémoire...).
+
+Évolution du projet
+Nous pourrions bien entendu étendre ce projet avec un jeu d'instruction plus complet. En effet, nous sommes ici limités à 16 instructions puisque codeop ne possède que 4 bits.

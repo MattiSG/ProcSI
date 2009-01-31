@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <strings.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -55,7 +56,7 @@ const Command commands[NB_COMMANDS] = {
     [INSTR]      = { "instr", "display current instruction for the VM (the next to be executed in step-by-step mode)" },
     [RESTART]    = { "reload", "reload the program (updates from the file)" },
     [DISPLAY]    = { "display", "display a register or memory unit value, or the whole VM status\n\tUsage: display [(reg number|PC|SP|SR) | (mem number)]" },
-    [BREAKPOINT] = { "breakpoint", "add or remove a breakpoint\n\tUsage: breakpoint (add|rm) PC_INDEX\n\tYou'll notice that the index is the PC, not a line number (in order to have consistency between source and disassembled files). Please refer to the PCs given by the \"program\" command." },
+    [BREAKPOINT] = { "breakpoint", "add or remove a breakpoint\n\tUsage: breakpoint (add|rm) PC_INDEX\n\tYou'll notice that the index is the PC, not a line number (in order to have consistency between source and disassembled files).\n\tPlease refer to the PCs given by the \"program\" command." },
     [HELP]       = { "help", "display help" },
     [QUIT]       = { "quit", "close the debugger" }
 };
@@ -68,7 +69,7 @@ const Command commands[NB_COMMANDS] = {
 int find_command(char *cmd)
 {
     for (unsigned int i = 0; i < NB_COMMANDS; ++i)
-        if (! strncmp(cmd, commands[i].name, strlen(commands[i].name)) && strlen(cmd) == strlen(commands[i].name))
+        if (! strncasecmp(cmd, commands[i].name, strlen(commands[i].name)) && strlen(cmd) == strlen(commands[i].name))
             return i;
 
     return UNKNOWN;
@@ -81,7 +82,7 @@ int find_command(char *cmd)
 void display_help()
 {
     for (unsigned int i = 0; i < NB_COMMANDS; ++i)
-        printf((ANSI_OUTPUT ? "  \e[33m%s\e[0m:\t%s\n" : "  %s:\t%s\n"), commands[i].name, commands[i].help);
+        printf((ANSI_OUTPUT ? "  \e[33m%s\e[0m:\n\t%s\n" : "  %s:\n\t%s\n"), commands[i].name, commands[i].help);
 }
 
 void debugger_new(Debugger *debug, char *filename, bool isSource)
