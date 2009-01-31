@@ -94,7 +94,7 @@ bool sivm_step(SIVM *sivm)
 
     /* stop the vm */
     if (m->codage.codeop == HALT) {
-		logm(LOG_INFO, "HALT instruction encountered, stopping VM.");
+		logm(LOG_DEBUG, "HALT instruction encountered, stopping VM.");
         return false;
 	}
 	
@@ -109,6 +109,7 @@ bool sivm_step(SIVM *sivm)
  */
 bool increment_PC(SIVM *sivm)
 {
+	if (sivm->pc == UINT16_MAX) sivm->pc = 0;
 	if (checkMemoryAccess(&sivm->pc)) {
 		sivm->pc++;
 		return true;
