@@ -47,7 +47,9 @@ int main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "Usage: %s --compile, -c OUTPUT_FILE SOURCE_FILE\n"
+        fprintf(stderr, "PROCSI emulator. Assemble, disassemble and execute PROCSI instructions.\n"
+						"Authors: Romain Giraud, Clément Léger, Matti Schneider-Ghibaudo. W00T!!\n"
+						"Usage: %s --compile, -c OUTPUT_FILE SOURCE_FILE\n"
                         "       %s --source, -s SOURCE_FILE\n"
                         "       %s BINARY_FILE\n", argv[0], argv[0], argv[0]);
         return 1;
