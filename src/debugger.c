@@ -140,11 +140,6 @@ void debugger_start(Debugger *debug)
     bool finish = false;
     do
     {
-        //printf("$ ");
-        //fflush(stdout);
-        //char line[LINE_MAX];
-        //readLine(line, LINE_MAX);
-
         char *line = readline ("> ");
         if (!line) {
             printf("\n");
@@ -187,12 +182,12 @@ void debugger_start(Debugger *debug)
 				if (ANSI_OUTPUT) {
 					printf("\e[36mMemory size:\e[0m\n\t%d\n", MEMSIZE);
 					printf("\e[36mNumber of registers:\e[0m\n\t%d\n", NREGS);
-					printf("\e[36mReserved registers (not updated on CALL and RET):\e[0m\n\tR%d-R%d\n", PARAM_REGS_START, PARAM_REGS_END);
+					printf("\e[36mParameter registers (not updated on CALL and RET):\e[0m\n\tR%d-R%d\n", PARAM_REGS_START, PARAM_REGS_END);
 					printf("\e[36mStack is going through\e[0m %s adresses\n", (SP_INCR > 0 ? "ascending" : "descending"));
 				} else {
 					printf("Memory size:\n\t%d\n", MEMSIZE);
 					printf("Number of registers:\n\t%d\n", NREGS);
-					printf("Reserved registers (not updated on CALL and RET):\n\tR%d-R%d\n", PARAM_REGS_START, PARAM_REGS_END);
+					printf("Parameter registers (not updated on CALL and RET):\n\tR%d-R%d\n", PARAM_REGS_START, PARAM_REGS_END);
 					printf("Stack is going through %s adresses\n", (SP_INCR > 0 ? "ascending" : "descending"));
 				}
             case DISPLAY:

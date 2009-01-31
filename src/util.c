@@ -88,7 +88,7 @@ bool superRecover(REG *val, char *format, ...)
 	logm(FATAL_LEVEL + 1, "%s", msg);
 
 	if (ANSI_OUTPUT) printf("\e[43m\e[30m");
-	printf("\n========>> Fatal error: SUPERRECOVER ACTIVATED <<========\n\nSuperRecover has your back!\nPlease modify the value that caused the invalid access (%d), or type any letter to continue with the fatal error: ", *val);
+	printf("\n========>> Fatal error: SUPERRECOVER ACTIVATED <<========\n\nDon't panic! SuperRecover has your back!\nPlease modify the value that caused the invalid access (%d), or type any letter to continue with the fatal error: ", *val);
 	if (ANSI_OUTPUT) printf("\e[0m");
 	int buffer;
 	if (! scanf("%d", &buffer)) {
