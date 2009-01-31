@@ -126,7 +126,7 @@ bool instr_jmp(SIVM *sivm, REG *dest, cmd_word source)
 	checkMemoryAccess(&source.brut);
 	if (source.brut == sivm->pc || source.brut == sivm->pc - 1) //Immediate or register jump destinations
 		superRecover(&source.brut, "Infinite loop (jumping to %d recursively)", source.brut);
-	sivm->pc = source.brut;
+	sivm->pc = source.brut - 1; //because of post-incrementation
     return true;
 }
 
@@ -201,7 +201,7 @@ bool instr_ret(SIVM *sivm, REG *dest, cmd_word source)
  */
 bool instr_halt(SIVM *sivm, REG *dest, cmd_word source)
 {
-	logm(3, "HALT instruction encountered.");
+	logm(LOG_DEBUG, "HALT instruction encountered.");
     return false;
 }
 
