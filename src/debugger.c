@@ -242,7 +242,7 @@ void debugger_start(Debugger *debug)
                             breakpoint_list_display(&breakpoints);
                         }
                         else
-                            printf("no breakpoint");
+                            printf("no breakpoint\n");
                     }
                     else if (!strcmp(type, "add"))
                     {
