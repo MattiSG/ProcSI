@@ -1,3 +1,5 @@
+; Programme de test des fonctionnalités de décalage binaire de l'émulateur PROCSI
+
 mov R0, #0x5
 mov R1, #0x39
 shl R0, #8

@@ -1,5 +1,5 @@
+; Fichier de test de l'émulateur PROCSI
 
-; lol
 jmp #2
 push #2
 pop R0

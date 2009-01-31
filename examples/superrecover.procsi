@@ -1,0 +1,10 @@
+; Démonstration de la fonctionnalité SuperRecover
+; L'instruction de la ligne 4 est évidemment une boucle infinie.
+; SuperRecover vous propose alors de modifier l'adresse de destination du branchement.
+; Choisissez l'instruction HALT pour arrêter l'exécution.
+
+mov R0, #2
+boucle:
+    jmp boucle
+
+halt
