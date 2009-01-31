@@ -78,15 +78,28 @@ void logm(char level, char *format, ...)
     va_end(args);
 }
 
-bool superRecover(REG *val)
+bool superRecover(REG *val, char *format, ...)
 {
-	printf("SuperRecover has your back!\nPlease modify the value that caused the invalid access (%d), or type nothing to continue with the fatal error: ", *val);
+    va_list args;
+    va_start(args, format);
+	char msg[500];
+	vsprintf(msg, format,args);
+	
+	logm(FATAL_LEVEL + 1, "%s", msg);
+
+	if (ANSI_OUTPUT) printf("\e[43m\e[30m");
+	printf("\n========>> Fatal error: SUPERRECOVER ACTIVATED <<========\n\nSuperRecover has your back!\nPlease modify the value that caused the invalid access (%d), or type any letter to continue with the fatal error: ", *val);
+	if (ANSI_OUTPUT) printf("\e[0m");
 	int buffer;
 	if (! scanf("%d", &buffer)) {
 		printf("Well, we tried to save you...\n");
+		logm(LOG_FATAL_ERROR, "%s", msg);
 		return false;
 	}
 	printf("%d\n", buffer);
 	*val = (REG) buffer;
+
+    va_end(args);
+	
 	return true;
 }

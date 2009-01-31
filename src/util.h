@@ -41,7 +41,7 @@ bool readLine(char *str, size_t length);
 
 /**Logs debugging messages.
  *@param	level	the priority level of the message ; maximum priority is 0, and should be used for fatal errors only.
- *@param	format	format of the message to log
+ *@param	format, ...		the message to log, see printf
  *@see	ERR_LOG_LEVEL
  *@see	OUT_LOG_LEVEL
  */
@@ -49,7 +49,8 @@ void logm(char level, char *format, ...);
 
 /**Try to make a last-moment recovery from an invalid value.
  *@param	val	pointer to the value to possibly modify
+ *@param	format, ...		the message to log, see printf
  *@returns	true if the user wanted to modify the value, false if not
  */
-bool superRecover(REG *val);
+bool superRecover(REG *val, char *format, ...);
 #endif /*UTIL_H*/

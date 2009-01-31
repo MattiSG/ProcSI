@@ -59,9 +59,7 @@ bool sivm_exec(SIVM *, cmd_word *);
 bool checkMemoryAccess(REG *index)
 {
 	if (*index > MEMSIZE) {
-		logm(FATAL_LEVEL - 1, "Invalid memory access: %d (memsize is %d)", index, MEMSIZE);
-		if (! superRecover(index))
-			logm(LOG_FATAL_ERROR, "Invalid memory access: %d (memsize is %d)", index, MEMSIZE);
+		superRecover(index, "Invalid memory access: %u (memsize is %d)", *index, MEMSIZE);
 		return false;
 	}
 	return true;
@@ -232,7 +230,7 @@ bool sivm_print_register(SIVM *sivm, unsigned int reg)
 			break;
 		default:
 			if (reg < NREGS)
-				printf((ANSI_OUTPUT ? "\e[36mR%d\e\[0m = %d\n" : "R%d = %d\n"), reg, sivm->reg[reg - 1]);
+				printf((ANSI_OUTPUT ? "\e[36mR%d\e\[0m = %d\n" : "R%d = %d\n"), reg, sivm->reg[reg]);
 			else
 				return false;
 			break;

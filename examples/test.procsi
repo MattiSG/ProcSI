@@ -1,6 +1,6 @@
 
 ; lol
-add R4, #1329
+mov R1, #1200
 push #2
 pop R0
 add R4, #8

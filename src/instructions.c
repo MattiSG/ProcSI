@@ -8,7 +8,7 @@
 /**Emulates the LOAD command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_load(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_load(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest = source.brut;
     return true;
@@ -17,7 +17,7 @@ bool instr_load(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the STR command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_store(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_store(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest = source.brut;
     return true;
@@ -26,7 +26,7 @@ bool instr_store(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the MOV command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_mov(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_mov(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest = source.brut;
 	sivm->sr = *dest;
@@ -36,7 +36,7 @@ bool instr_mov(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the ADD command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_add(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_add(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest += source.brut;
 	sivm->sr = *dest;
@@ -46,7 +46,7 @@ bool instr_add(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the SUB command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_sub(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_sub(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest -= source.brut;
 	sivm->sr = *dest;
@@ -56,7 +56,7 @@ bool instr_sub(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the AND command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_and(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_and(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest &= source.brut;
 	sivm->sr = *dest;
@@ -66,7 +66,7 @@ bool instr_and(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the OR command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_or(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_or(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest |= source.brut;
 	sivm->sr = *dest;
@@ -76,7 +76,7 @@ bool instr_or(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the DEC command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_dec(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_dec(SIVM *sivm, REG *dest, cmd_word source)
 {
 	--(*dest);
 	sivm->sr = *dest;
@@ -86,7 +86,7 @@ bool instr_dec(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the SHL command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_shl(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_shl(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest <<= source.brut;
 	sivm->sr = *dest;
@@ -96,7 +96,7 @@ bool instr_shl(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the SHR command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_shr(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_shr(SIVM *sivm, REG *dest, cmd_word source)
 {
 	*dest >>= source.brut;
 	sivm->sr = *dest;
@@ -106,7 +106,7 @@ bool instr_shr(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the CMP command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_cmp(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_cmp(SIVM *sivm, REG *dest, cmd_word source)
 {
 	sivm->sr = (*dest - source.brut);
     return true;
@@ -121,20 +121,19 @@ bool instr_cmp(SIVM *sivm, REG *dest, const cmd_word source)
  *@param	source	the adress at which the PC register of the given SIVM should be put at.
  *@return	true if the command was successful, false if the PC argument is out of memory bounds.
  */
-bool instr_jmp(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_jmp(SIVM *sivm, REG *dest, cmd_word source)
 {
-	if (source.brut > MEMSIZE) {
-		logm(0, "Jumping too far!");
-		return false;
-	}
-	sivm->pc = source.brut - 1;
+	checkMemoryAccess(&source.brut);
+	if (source.brut == sivm->pc || source.brut == sivm->pc - 1) //Immediate or register jump destinations
+		superRecover(&source.brut, "Infinite loop (jumping to %d recursively)", source.brut);
+	sivm->pc = source.brut;
     return true;
 }
 
 /**Emulates the JEQ command in the given SIVM.
  *@see	instr_jmp
  */
-bool instr_jeq(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_jeq(SIVM *sivm, REG *dest, cmd_word source)
 {
 	if (sivm->sr == 0)
 		return instr_jmp(sivm, dest, source);
@@ -144,7 +143,7 @@ bool instr_jeq(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the PUSH command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_push(SIVM *sivm, REG *dest, cmd_word source)
 {
 	REG newSp = sivm->sp + SP_INCR;
 	checkMemoryAccess(&sivm->sp);
@@ -157,7 +156,7 @@ bool instr_push(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the POP command in the given SIVM.
  *@return	true if the command was successful.
  */
-bool instr_pop(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_pop(SIVM *sivm, REG *dest, cmd_word source)
 {
 	REG newSp = sivm->sp - SP_INCR;
 	checkMemoryAccess(&newSp);
@@ -170,7 +169,7 @@ bool instr_pop(SIVM *sivm, REG *dest, const cmd_word source)
  *@see	instr_push
  *@see	instr_jmp
  */
-bool instr_call(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_call(SIVM *sivm, REG *dest, cmd_word source)
 {
 	if (! instr_push(sivm, dest, (cmd_word) sivm->pc))
 		return false;
@@ -187,7 +186,7 @@ bool instr_call(SIVM *sivm, REG *dest, const cmd_word source)
  *@see	instr_pop
  *@see	instr_jmp
  */
-bool instr_ret(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_ret(SIVM *sivm, REG *dest, cmd_word source)
 {
 	for (int i = NREGS - 1; i >= 0; i--)
 		if (i < PARAM_REGS_START || i >= PARAM_REGS_END) //ignore reserved registers
@@ -200,7 +199,7 @@ bool instr_ret(SIVM *sivm, REG *dest, const cmd_word source)
 /**Emulates the HALT command in the given SIVM.
  *@return	false, in order to stop the VM.
  */
-bool instr_halt(SIVM *sivm, REG *dest, const cmd_word source)
+bool instr_halt(SIVM *sivm, REG *dest, cmd_word source)
 {
 	logm(3, "HALT instruction encountered.");
     return false;

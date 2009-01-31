@@ -32,6 +32,7 @@ typedef enum
     STEP,
 	PROGRAM,
 	INFO,
+	INSTR,
     RESTART,
     DISPLAY,
     BREAKPOINT,
@@ -40,7 +41,7 @@ typedef enum
     UNKNOWN
 } type_command;
 
-#define NB_COMMANDS 9 /*!< number of commands */
+#define NB_COMMANDS 10 /*!< number of commands */
 
 /**
  * @brief Array of available commands
@@ -51,6 +52,7 @@ Command commands[NB_COMMANDS] = {
     [STEP]       = { "step", "execute one instruction in the program" },
     [PROGRAM]    = { "program", "display the disassembled program currently loaded in the VM" },
     [INFO]       = { "info", "display specifications of the current VM" },
+    [INSTR]      = { "instr", "display current instruction for the VM (the next to be executed in step-by-step mode)" },
     [RESTART]    = { "reload", "reload the program (updates from the file)" },
     [DISPLAY]    = { "display", "display a register or memory unit value, or the whole VM status\n\tUsage: display [(reg number|PC|SP|SR) | (mem number)]" },
     [HELP]       = { "help", "display help" },
@@ -150,14 +152,18 @@ void debugger_start(Debugger *debug)
 
         switch (find_command(cmd))
         {
-            case RUN:
-                step_by_step = false;
-                execute = true;
-                break;
             case STEP:
-                step_by_step = true;
                 execute = true;
-                break;
+                step_by_step = true;
+				break;
+            case RUN:
+                execute = true;
+                step_by_step = false;
+				break;
+			case INSTR:
+				logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
+                step_by_step = true;
+				break;
             case QUIT:
                 finish = true;
                 execute = false;
@@ -224,7 +230,6 @@ void debugger_start(Debugger *debug)
                     else
 						printf("Usage: %s\n", commands[DISPLAY].help);
                 }
-                break;
             case BREAKPOINT:
                 {
                     execute = false;
@@ -282,13 +287,14 @@ void debugger_start(Debugger *debug)
 
         while (execute)
         {
+			
+			logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
             if (end_found)
             {
                 logm(LOG_STEP, "End of program reached\n");
                 break;
             }
 
-            logm(LOG_INFO, sivm_get_instruction_string(&debug->sivm));
             end_found = !sivm_step(&debug->sivm);
 
             if (step_by_step || breakpoint_list_has(&breakpoints, debug->sivm.pc)) break;
