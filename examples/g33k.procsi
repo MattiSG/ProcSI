@@ -1,0 +1,40 @@
+; Code automodifiable :
+; la fonction write_leet est censée écrire 1337 dans le registre R0.
+; cependant, inc_leet incrémente le registre de destination de l'écriture à laquelle procède write_leet
+; ici donc, le programme écrit 1337 dans R1, puis R2.
+
+
+; mov R0, #0
+
+call inc_leet
+call write_leet
+
+call inc_leet
+call write_leet
+
+halt
+
+write_leet:
+    mov R0, #1337    
+    ret
+
+; increments the destination register
+inc_leet:
+    ; inc R0
+    add R0, #1
+
+    ; read the opcode for mov R0, #x
+    load R7, [write_leet]
+
+    ; reset the destination
+    and R7, #b0001111111111111
+
+    ; write R0 to destination
+    mov R6, R0
+    shl R6, #13
+    or R7, R6
+
+    ; rewrite the function write_leet
+    store [write_leet], R7
+
+    ret

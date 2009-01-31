@@ -168,9 +168,16 @@ bool parse_number(Parser* parser, int* value, bool modifiable)
             // label
             else
             {
+                char* pp = parser->cur;
+                int len = 0;
+                while (isalnum(*parser->cur) || *parser->cur == '_')
+                {
+                    len++;
+                    parser->cur++;
+                    parser->col++;
+                }
                 REG reg;
-                if(lbllist_get(parser->labels, parser->cur,
-                               strlen(parser->cur) - 1, &reg))
+                if(lbllist_get(parser->labels, pp, len, &reg))
                 {
                     *value = reg;
                     return true;
@@ -289,6 +296,8 @@ bool parse_attrib(Parser *parser, PMode *pmode, int *data, int *reg)
                  parser->row, parser->col, *parser->cur);
             return false;
         }
+        parser->cur++;
+        parser->col++;
     }
 
     return true;
