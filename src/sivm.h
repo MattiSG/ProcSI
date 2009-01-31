@@ -22,7 +22,7 @@ typedef uint16_t REG;
  *The registers in this reserved range won't be updated by a call to RET, and not saved by a call to CALL.
  *@see	PARAM_REGS_START
  */
-#define PARAM_REGS_END 3
+#define PARAM_REGS_END NREGS
 /**Size of an SIVM's memory*/
 #define MEMSIZE 128
 /**PC index at SIVM startup*/

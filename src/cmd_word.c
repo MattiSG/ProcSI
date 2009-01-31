@@ -143,7 +143,7 @@ char* disassemble(int length, const cmd_word words[])
 	buffer[0] = '\0'; //prevent useless characters cross-platform-wise
 	if (ANSI_OUTPUT)
 		strcat(buffer, "\e[35m");
-	strcat(buffer, "L (PC)|\tInstr\tDest\tSource\n---------------------------------\n");
+	strcat(buffer, "L (PC)|\t\tInstr\tDest\tSource\n-----------------------------------------\n");
 	if (ANSI_OUTPUT)
 		strcat(buffer, "\e[0m");
 		   
@@ -152,7 +152,7 @@ char* disassemble(int length, const cmd_word words[])
 	{
 		char lineBuffer[MAX_INSTR_PRINT_SIZE];
 		
-		sprintf(lineBuffer, (ANSI_OUTPUT ? "\e[35m%d (%d)|\t" : "%d (%d)|\t"), line, i);
+		sprintf(lineBuffer, (ANSI_OUTPUT ? "\e[35m%.2d (%.2d)  |\t" : "%.2d (%.2d)  |\t"), line, i);
 		if (ANSI_OUTPUT) strcat(lineBuffer, "\e[0m");
 		
 		strcat(buffer, lineBuffer);

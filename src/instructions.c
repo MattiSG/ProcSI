@@ -123,7 +123,7 @@ bool instr_cmp(SIVM *sivm, REG *dest, cmd_word source)
  */
 bool instr_jmp(SIVM *sivm, REG *dest, cmd_word source)
 {
-	checkMemoryAccess(&source.brut);
+	if (!checkMemoryAccess(&source.brut)) return false;
 	if (source.brut == sivm->pc || source.brut == sivm->pc - 1) //Immediate or register jump destinations
 		superRecover(&source.brut, "Infinite loop (jumping to %d recursively)", source.brut);
 	sivm->pc = source.brut - 1; //because of post-incrementation
@@ -137,7 +137,7 @@ bool instr_jeq(SIVM *sivm, REG *dest, cmd_word source)
 {
 	if (sivm->sr == 0)
 		return instr_jmp(sivm, dest, source);
-    return false;
+    return true;
 }
 
 /**Emulates the PUSH command in the given SIVM.
@@ -146,8 +146,8 @@ bool instr_jeq(SIVM *sivm, REG *dest, cmd_word source)
 bool instr_push(SIVM *sivm, REG *dest, cmd_word source)
 {
 	REG newSp = sivm->sp + SP_INCR;
-	checkMemoryAccess(&sivm->sp);
-	checkMemoryAccess(&newSp);
+	if ((! checkMemoryAccess(&sivm->sp)) || (! checkMemoryAccess(&newSp)))
+		 return false;
 	sivm->mem[sivm->sp] = source;
 	sivm->sp = newSp;
 	return true;
@@ -159,7 +159,8 @@ bool instr_push(SIVM *sivm, REG *dest, cmd_word source)
 bool instr_pop(SIVM *sivm, REG *dest, cmd_word source)
 {
 	REG newSp = sivm->sp - SP_INCR;
-	checkMemoryAccess(&newSp);
+	if (! checkMemoryAccess(&newSp))
+		 return false;
 	*dest = sivm->mem[newSp].brut;
 	sivm->sp = newSp;
 	return true;
@@ -175,7 +176,7 @@ bool instr_call(SIVM *sivm, REG *dest, cmd_word source)
 		return false;
 	
 	for (int i = 0; i < NREGS; i++)
-		if (i < PARAM_REGS_START || i >= PARAM_REGS_END) //ignore reserved registers
+		if (i < PARAM_REGS_START || i > PARAM_REGS_END) //ignore reserved registers
 			if (! instr_push(sivm, dest, (cmd_word) sivm->reg[i]))
 				return false;
 	
@@ -189,7 +190,7 @@ bool instr_call(SIVM *sivm, REG *dest, cmd_word source)
 bool instr_ret(SIVM *sivm, REG *dest, cmd_word source)
 {
 	for (int i = NREGS - 1; i >= 0; i--)
-		if (i < PARAM_REGS_START || i >= PARAM_REGS_END) //ignore reserved registers
+		if (i < PARAM_REGS_START || i > PARAM_REGS_END) //ignore reserved registers
 			if (! instr_pop(sivm, &sivm->reg[i], source))
 				return false;
 	
@@ -202,7 +203,7 @@ bool instr_ret(SIVM *sivm, REG *dest, cmd_word source)
 bool instr_halt(SIVM *sivm, REG *dest, cmd_word source)
 {
 	logm(LOG_DEBUG, "HALT instruction encountered.");
-    return false;
+    return true;
 }
 
 /**Describes all available instructions.

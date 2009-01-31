@@ -1,19 +1,21 @@
 ; Code automodifiable :
 ; la fonction write_leet est censée écrire 1337 dans le registre R0.
 ; cependant, inc_leet incrémente le registre de destination de l'écriture à laquelle procède write_leet
-; ici donc, le programme écrit 1337 dans R1, puis R2.
+; enfin, on utilise la boucle loop pour remplir tous les registres de R0 à R4
 
+mov R5, #4
 
-; mov R0, #0
+loop:
+	call inc_leet
+	call write_leet
+	sub R5, #1
+	jeq end
+	jmp loop
 
-call inc_leet
-call write_leet
-
-call inc_leet
-call write_leet
-
-halt
-
+end:
+	call write_leet
+	halt
+	
 write_leet:
     mov R0, #1337    
     ret

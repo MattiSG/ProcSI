@@ -1,0 +1,13 @@
+; Exemple d'utilisation de branchements conditionnels
+
+mov R1, #0
+jeq correct
+
+incorrect:
+	mov R3, #666
+	
+correct:
+	mov R2, #42
+	jeq incorrect
+	
+halt
