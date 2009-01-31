@@ -512,52 +512,52 @@ bool parse_pass_line(Parser* parser, char *line)
         parser->cur += len;
         parser->col += len;
 
-        if(!strcmp(instr, "load"))
+        if(!strcasecmp(instr, "load"))
             m[0].codage.codeop = LOAD;
 
-        else if(!strcmp(instr, "store"))
+        else if(!strcasecmp(instr, "store"))
             m[0].codage.codeop = STORE;
 
-        else if(!strcmp(instr, "add"))
+        else if(!strcasecmp(instr, "add"))
             m[0].codage.codeop = ADD;
 
-        else if(!strcmp(instr, "sub"))
+        else if(!strcasecmp(instr, "sub"))
             m[0].codage.codeop = SUB;
 
-        else if(!strcmp(instr, "and"))
+        else if(!strcasecmp(instr, "and"))
             m[0].codage.codeop = AND;
 
-        else if(!strcmp(instr, "or"))
+        else if(!strcasecmp(instr, "or"))
             m[0].codage.codeop = OR;
 
-        else if(!strcmp(instr, "shl"))
+        else if(!strcasecmp(instr, "shl"))
             m[0].codage.codeop = SHL;
 
-        else if(!strcmp(instr, "shr"))
+        else if(!strcasecmp(instr, "shr"))
             m[0].codage.codeop = SHR;
 
-        else if(!strcmp(instr, "jmp"))
+        else if(!strcasecmp(instr, "jmp"))
             m[0].codage.codeop = JMP;
 
-        else if(!strcmp(instr, "jeq"))
+        else if(!strcasecmp(instr, "jeq"))
             m[0].codage.codeop = JEQ;
 
-        else if(!strcmp(instr, "call"))
+        else if(!strcasecmp(instr, "call"))
             m[0].codage.codeop = CALL;
 
-        else if(!strcmp(instr, "ret"))
+        else if(!strcasecmp(instr, "ret"))
             m[0].codage.codeop = RET;
 
-        else if(!strcmp(instr, "push"))
+        else if(!strcasecmp(instr, "push"))
             m[0].codage.codeop = PUSH;
 
-        else if(!strcmp(instr, "pop"))
+        else if(!strcasecmp(instr, "pop"))
             m[0].codage.codeop = POP;
 
-        else if(!strcmp(instr, "mov"))
+        else if(!strcasecmp(instr, "mov"))
             m[0].codage.codeop = MOV;
         
-        else if(!strcmp(instr, "halt"))
+        else if(!strcasecmp(instr, "halt"))
             m[0].codage.codeop = HALT;
 
         else
