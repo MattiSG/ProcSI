@@ -12,8 +12,8 @@ endif(DOXYGEN_FOUND)
 
 file(GLOB_RECURSE src_files src/*)
 
-add_executable(main ${src_files})
-target_link_libraries(main readline)
+add_executable(procsi ${src_files})
+target_link_libraries(procsi readline)
 
 add_custom_target(run ${EXECUTABLE_OUTPUT_PATH}/main)
 
