@@ -41,7 +41,7 @@ typedef enum
     UNKNOWN
 } type_command;
 
-#define NB_COMMANDS 11 /*!< number of commands */
+#define NB_COMMANDS 10 /*!< number of commands */
 
 /**
  * @brief Array of available commands
