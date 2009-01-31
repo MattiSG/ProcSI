@@ -1,0 +1,24 @@
+ L'émulateur fournit une ligne de commande pour permettre le contrôle de l'application procsi.
+
+Exécuter le programme en entier se fait à l'aide de la commande "run".
+
+Quitter le débogueur s'effectue par "quit", ou par la combinaison clavier Ctrl+D.
+
+
+= Déboguage d'un programme procsi =
+
+La commande "program" affiche une version désassemblée du programme. Elle permet aussi d'obtenir l'adresse individuelle de chaque instruction.
+
+Pour n'afficher que l'instruction suivante à être interprétée s'effectue par la commande "instr", il est aussi possible de l'exécuter individuellement par "step".
+
+Plutôt que de l'exécuter instruction par instruction il est aussi possible d'interrompre un programme dans son exécution à l'aide de points d'arrêts placés par la commande "breakpoint".
+Cette commande prend deux arguments :
+- "add" ou "rm" pour respectivement ajouter ou supprimer un point d'arrêt.
+- Le PC (ou adresse d'instruction) où le programme devra être interrompu
+
+Pour vérifier le bon fonctionnement du programme, il est possible d'afficher l'état des registres processeur à l'aide de la commande "info", ainsi que de la commande "display".
+Cette dernière prend deux cas :
+- L'affichage d'un registre, se faisait par "reg x" ou x un numéro de registre (PC, SP, SR pour les registres spéciaux)
+- L'affichage d'un mot mémoire, par "mem x", x étant l'adresse mémoire souhaitée.
+
+Réinitialiser la machine virtuelle et recharger le code procsi s'effectue à l'aide "reload". Les registres et la mémoire sont donc effacées et réinitialisés à 0. 
