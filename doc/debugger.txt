@@ -14,3 +14,7 @@ La compilation du programme se déroule en plusieurs étapes :
 L'éxécution du programme enclenche divers processus.
 En premier lieu, le debuggeur est initialisé. Il récupére le programme (soit d'un fichier source, soit d'un fichier binaire), le charge. Puis il lance la machine virtuelle.
 C'est lui-même qui va s'occuper de la communication entre l'utilisateur et la machine virtuelle. C'est en quelque sorte un mini-shell (juste pour souligner que l'historique des appels est disponible à l'aide des fléches directionnelles).  L'utilisateur a à sa disposition de nombreuses fonctions permettant d'analyser le programme et son fonctionnement.
+
+Le fichier source :
+Voici les différentes opérations que vous pouvez utiliser dans vos fichiers sources : LOAD, STORE, ADD, SUB, JMP, JEQ, CALL, RET, PUSH, POP, MOV, AND, OR, SHL, SHR, HALT.
+Vous pouvez aussi utiliser des labels pour paramétrer les sauts sans avoir à écrire l'adresse exacte.
