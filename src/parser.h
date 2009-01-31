@@ -1,7 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#define _POSIX_SOURCE
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
