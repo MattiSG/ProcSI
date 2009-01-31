@@ -1,0 +1,6 @@
+; opération bit à bit
+mov R0, #6
+and R0, #2
+mov R1, #4
+or  R1, #2
+halt

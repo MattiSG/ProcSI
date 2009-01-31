@@ -1,3 +1,0 @@
-mov R0, #6
-and R0, #2
-halt
