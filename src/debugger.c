@@ -145,9 +145,12 @@ void debugger_start(Debugger *debug)
         //readLine(line, LINE_MAX);
 
         char *line = readline ("> ");
+        if (!line) {
+            printf("\n");
+            break;
+        }
+        if (!strlen(line)) continue;
         char *cmd = strtok(line, " ");
-        if (!strlen(line))
-            continue;
 
         switch (find_command(cmd))
         {
