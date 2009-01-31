@@ -171,6 +171,8 @@ void debugger_start(Debugger *debug)
 			case PROGRAM:
 				printf(disassemble(debug->presult.memsize, debug->presult.mem));
 				printf("(Total size: %d words)\n", (int) debug->presult.memsize);
+                end_found = false;
+                execute = false;
 				break;
 			case INFO:
 				if (ANSI_OUTPUT) {
